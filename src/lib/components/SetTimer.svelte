@@ -1,92 +1,96 @@
 <script>
-	import { goto } from "$app/navigation";
+	import { goto } from '$app/navigation';
 
-    let { showModal = $bindable(), selectedTask } = $props();
+	let { showModal = $bindable(), selectedTask } = $props();
 
-    /**
-     * @type {HTMLDialogElement}
-     */
-    let dialog;
+	/**
+	 * @type {HTMLDialogElement}
+	 */
+	let dialog;
 
-    $effect(() => {
-        if (showModal) dialog?.showModal();
-    });
+	let minutes = 25;
 
-    function close() {
-        showModal = false;
-        dialog.close();
-    }
+	$effect(() => {
+		if (showModal) dialog?.showModal();
+	});
 
-    function startTimer() {
-        close();
+	function close() {
+		showModal = false;
+		dialog.close();
+	}
 
-        goto(`/work-timer`);
-    }
+	function startTimer() {
+		close();
 
+		goto(`/work-timer?minutes=${minutes}`);
+	}
 </script>
 
 <dialog
-    bind:this={dialog}
-    onclose={close}
-    onclick={(e) => {
-        if (e.target === dialog) close();
-    }}
-    class="
-        fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-        w-[520px] max-w-[90vw]
-        bg-[#fdf3e7]
-        border-[6px] border-double border-[#ad8a6c]
+	bind:this={dialog}
+	onclose={close}
+	onclick={(e) => {
+		if (e.target === dialog) close();
+	}}
+	class="
+        fixed top-1/2 left-1/2 w-[520px] max-w-[90vw]
+        -translate-x-1/2 -translate-y-1/2
         rounded-xl
-        shadow-[0_0_20px_rgba(0,0,0,0.5)]
-        font-['IM_Fell_Great_Primer_SC']
+        border-[6px] border-double border-[#ad8a6c]
+        bg-[#fdf3e7]
         p-0
+        font-['IM_Fell_Great_Primer_SC']
+        shadow-[0_0_20px_rgba(0,0,0,0.5)]
     "
 >
-    <div
-        class="
+	<div
+		class="
             flex items-center justify-between
-            text-[#4F3117]
-            px-6 py-4
-            border-b-2 border-[#ad8a6c]
+            border-b-2
+            border-[#ad8a6c] px-6
+            py-4 text-[#4F3117]
         "
-    >
-        <h2 class="text-2xl">
-            Set Timer for: {selectedTask.title}
-        </h2>
+	>
+		<h2 class="text-2xl">
+			Set Timer for: {selectedTask.title}
+		</h2>
 
-        <button
-            onclick={close}
-            aria-label="Close"
-            class="
-                bg-transparent border-none
-                text-xl text-[#4F3117]
-                cursor-pointer
+		<button
+			onclick={close}
+			aria-label="Close"
+			class="
+                cursor-pointer border-none
+                bg-transparent text-xl
+                text-[#4F3117]
                 transition-transform duration-200
                 hover:rotate-12
             "
-        >
-            ✖
-        </button>
-    </div>
+		>
+			✖
+		</button>
+	</div>
 
-    <div class="p-6 space-y-4">
-        <p class="text-[#4F3117]">Configure your timer here:</p>
-        <input
-            type="number"
-            placeholder="Minutes"
-            class="w-full p-3 border-2 border-[#ad8a6c] rounded-lg text-lg"
-        />
-        <button
-            onclick={startTimer}
-            class="
-                bg-[#fff8e1] border-2 border-[#ad8a6c]
-                px-4 py-2 text-lg rounded-lg
-                cursor-pointer
+	<div class="space-y-4 p-6">
+		<p class="text-[#4F3117]">Configure your timer here:</p>
+		<input
+			type="number"
+			min="1"
+			bind:value={minutes}
+			placeholder="Minutes"
+			class="w-full rounded-lg border-2 border-[#ad8a6c] p-3 text-lg"
+		/>
+
+		<button
+			onclick={startTimer}
+			class="
+                cursor-pointer rounded-lg border-2
+                border-[#ad8a6c] bg-[#fff8e1] px-4 py-2
+                text-lg
                 transition-all duration-200 ease-in-out
-                hover:bg-[#f1e0c5] hover:scale-[1.03]
+                hover:scale-[1.03] hover:bg-[#f1e0c5]
             "
-        >
-            Start Timer
-        </button>
-    </div>
+		>
+			Start Timer
+		</button>
+	</div>
 </dialog>

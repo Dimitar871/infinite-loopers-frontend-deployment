@@ -65,9 +65,6 @@
 						{item.label}
 					</a>
 				{/each}
-				<span class="font-medium text-[#4F3117]">
-					Welcome, {user['username']}!
-				</span>
 				<button
 					onclick={handleLogout}
 					class="ml-4 cursor-pointer rounded-lg bg-[#4F3117] px-3 py-2 text-[#EEE9E1] hover:bg-[#3E2612] sm:px-5 sm:py-2"
