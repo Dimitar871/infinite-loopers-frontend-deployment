@@ -7,17 +7,20 @@
 	import startTimer from '$lib/assets/work-timer/start-timer.png';
 
 	let minutes = 25;
+	let initialSeconds = 0;
 	let secondsLeft = 0;
 	let timer = null;
 	let running = false;
 	let initialized = false;
+	let alarmEnabled = true;
 
 	$: {
 		if (!initialized) {
 			const m = Number($page.url.searchParams.get('minutes'));
 			if (m > 0) {
 				minutes = m;
-				secondsLeft = minutes * 60;
+				initialSeconds = minutes * 60;
+				secondsLeft = initialSeconds;
 				initialized = true;
 			}
 		}
@@ -25,26 +28,59 @@
 
 	function toggleTimer() {
 		if (running) {
-			running = false;
-			clearInterval(timer);
-			timer = null;
+			pause();
 		} else {
-			running = true;
-			timer = setInterval(() => {
-				if (secondsLeft <= 0) {
-					stop();
-					return;
-				}
-				secondsLeft--;
-			}, 1000);
+			start();
 		}
 	}
 
-	function stop() {
+	function start() {
+		if (running) return;
+
+		running = true;
+		timer = setInterval(() => {
+			if (secondsLeft <= 0) {
+				finish();
+				return;
+			}
+			secondsLeft--;
+		}, 1000);
+	}
+
+	function pause() {
 		running = false;
 		clearInterval(timer);
 		timer = null;
 	}
+
+	function resetTimer() {
+		pause();
+		secondsLeft = initialSeconds;
+	}
+
+	function editSession() {
+		if (running) return;
+
+		const input = prompt('Edit session length (minutes):', minutes);
+		const m = Number(input);
+
+		if (m > 0) {
+			minutes = m;
+			initialSeconds = minutes * 60;
+			secondsLeft = initialSeconds;
+		}
+	}
+
+	function finish() {
+		pause();
+		secondsLeft = 0;
+
+		if (alarmEnabled) {
+			const audio = new Audio('/alarm.mp3'); // will put an actual alarm later
+			audio.play();
+		}
+	}
+
 
 	onDestroy(() => clearInterval(timer));
 
@@ -87,7 +123,7 @@
 	</div>
 </section>
 
-<div class="relative mt-6 flex justify-center sm:mt-8">
+<div class="mt-6 flex flex-col items-center gap-3 sm:mt-8">
 	<button
 		onclick={toggleTimer}
 		class="
@@ -115,4 +151,80 @@
 	>
 		{running ? 'Stop Timer' : 'Start Timer'}
 	</button>
+
+	<div class="flex flex-wrap justify-center gap-3">
+				<button
+			onclick={editSession}
+			disabled={running}
+			class="
+				flex h-[70px] w-[140px]
+				items-center justify-center
+				cursor-pointer
+
+				font-['IM_Fell_Great_Primer_SC']
+				text-lg tracking-wide
+				text-[#5a3e1b]
+
+				transition-all duration-150
+				hover:scale-105 hover:text-[#B69476]
+				disabled:opacity-50 disabled:cursor-not-allowed
+
+				sm:h-[80px] sm:w-[160px] sm:text-xl
+			"
+			style={`background-image: url(${startTimer});
+			        background-size: contain;
+			        background-position: center;
+			        background-repeat: no-repeat;`}
+		>
+			Edit Session
+		</button>
+
+		<button
+			onclick={resetTimer}
+			class="
+				flex h-[70px] w-[140px]
+				items-center justify-center
+				cursor-pointer
+
+				font-['IM_Fell_Great_Primer_SC']
+				text-lg tracking-wide
+				text-[#5a3e1b]
+
+				transition-all duration-150
+				hover:scale-105 hover:text-[#B69476]
+
+				sm:h-[80px] sm:w-[160px] sm:text-xl
+			"
+			style={`background-image: url(${startTimer});
+			        background-size: contain;
+			        background-position: center;
+			        background-repeat: no-repeat;`}
+		>
+			Reset Timer
+		</button>
+
+		<button
+			onclick={() => (alarmEnabled = !alarmEnabled)}
+			class="
+				flex h-[70px] w-[140px]
+				items-center justify-center
+				cursor-pointer
+
+				font-['IM_Fell_Great_Primer_SC']
+				text-lg tracking-wide
+				text-[#5a3e1b]
+
+				transition-all duration-150
+				hover:scale-105 hover:text-[#B69476]
+
+				sm:h-[80px] sm:w-[160px] sm:text-xl
+			"
+			style={`background-image: url(${startTimer});
+			        background-size: contain;
+			        background-position: center;
+			        background-repeat: no-repeat;`}
+		>
+			Alarm: {alarmEnabled ? 'On' : 'Off'}
+		</button>
+	</div>
 </div>
