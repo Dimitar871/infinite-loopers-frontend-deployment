@@ -11,6 +11,17 @@
     import streakIcon from '$lib/assets/home-page/streak.png';
     import questLog from '$lib/assets/questLog.png';
     let { data } = $props();
+
+    function calcTotalFocusTime(tasks) {
+      const totalSeconds = tasks.reduce((total, task) => total + (task.timeSpent || 0), 0);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      const hh = hours.toString().padStart(2, '0');
+      const mm = minutes.toString().padStart(2, '0');
+      const ss = seconds.toString().padStart(2, '0');
+      return `${hh}:${mm}:${ss}`;
+  }
 </script>
 
 <section class="relative grid place-items-center border-b-2 border-[#4F3117]" style="background-image: url({sky}); background-size: cover;">
@@ -48,13 +59,13 @@
     <div class="flex flex-col items-center rounded-lg p-6 sm:p-8 bg-[#E3D3BF] border-4 border-[#4f311747] w-full max-w-[300px]">
       <p class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-xl sm:text-2xl">Focused for:</p>
       <img src={hourglassIcon} alt='hourglass' class="w-auto h-20 sm:h-30 my-4"/>
-      <p class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-3xl">00:00:00</p>
+      <p class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-3xl">{calcTotalFocusTime(data.tasks)}</p>
     </div>
 
     <div class="flex flex-col items-center rounded-lg p-6 sm:p-8 bg-[#E3D3BF] border-4 border-[#4f311747] w-full max-w-[300px]">
       <p class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-xl sm:text-2xl">Quests completed:</p>
       <img src={scrollIcon} alt='scroll' class="w-auto h-20 sm:h-30 my-4"/>
-      <p class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-3xl">10</p>
+      <p class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-3xl">{data.tasks?.filter(task => task.completedAt).length || 0}</p>
     </div>
 
     <div class="flex flex-col items-center rounded-lg p-6 sm:p-8 bg-[#E3D3BF] border-4 border-[#4f311747] w-full max-w-[300px]">

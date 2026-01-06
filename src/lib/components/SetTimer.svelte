@@ -1,14 +1,17 @@
 <script>
 	import { goto } from '$app/navigation';
+	import { selectedTask } from '../../modalStore.js';
+	import { openModal } from '../../modalStore.js';
 
-	let { showModal = $bindable(), selectedTask } = $props();
+	let { showModal = $bindable() } = $props();
 
 	/**
 	 * @type {HTMLDialogElement}
 	 */
 	let dialog;
 
-	let minutes = 25;
+	let minutes = $state(25);
+	let isMinExceeded = $state(false);
 
 	$effect(() => {
 		if (showModal) dialog?.showModal();
@@ -16,12 +19,33 @@
 
 	function close() {
 		showModal = false;
-		dialog.close();
+		dialog?.close();
 	}
 
-	function startTimer() {
-		close();
+	async function saveDuration() {
+  if (!$selectedTask) return;
 
+  try {
+    const response = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        duration: minutes * 60
+      })
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+	async function startTimer() {
+		if (minutes > 120) {
+		isMinExceeded = true;
+        return;
+		}
+
+		await saveDuration();
+		close();
 		goto(`/work-timer?minutes=${minutes}`);
 	}
 </script>
@@ -52,7 +76,7 @@
         "
 	>
 		<h2 class="text-2xl">
-			Set Timer for: {selectedTask.title}
+			Set Timer for: {$selectedTask.title}
 		</h2>
 
 		<button
@@ -71,14 +95,18 @@
 	</div>
 
 	<div class="space-y-4 p-6">
-		<p class="text-[#4F3117]">Configure your timer here:</p>
+		<p class="text-[#4F3117] text-xl">Configure your timer here:</p>
 		<input
 			type="number"
 			min="1"
+			max="120"
 			bind:value={minutes}
 			placeholder="Minutes"
 			class="w-full rounded-lg border-2 border-[#ad8a6c] p-3 text-lg"
 		/>
+		{#if isMinExceeded}
+  			<p class="text-red-600 text-lg">Maximum focus time is 120 minutes!</p>
+		{/if}
 
 		<button
 			onclick={startTimer}
