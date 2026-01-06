@@ -54,19 +54,26 @@
 			const res = await fetch(`http://localhost:3010/tasks/${userId}`);
 			const data = await res.json();
 			if (data.success) {
-				tasks = data.tasks.map((task, index) => ({
-					id: task.id,
-					title: task.title,
-					end: task.endDate ? new Date(task.endDate).toISOString().split('T')[0] : '',
-					status: task.status,
-					category: task.category,
-					priority: task.priority,
-					originalIndex: index,
-					createdAt: task.createdAt || task.created_at || new Date().getTime(),
-					notes: task.notes || '',
-					suggestions: task.suggestions || '',
-					subtasks: task.subtasks || []
-				}));
+				tasks = data.tasks.map((task, index) => {
+					const subtasks = task.subtasks || [];
+					// Calculate status from subtasks if subtasks exist
+					const calculatedStatus = calculateStatusFromSubtasks(subtasks);
+					const status = calculatedStatus || task.status;
+					
+					return {
+						id: task.id,
+						title: task.title,
+						end: task.endDate ? new Date(task.endDate).toISOString().split('T')[0] : '',
+						status: status,
+						category: task.category,
+						priority: task.priority,
+						originalIndex: index,
+						createdAt: task.createdAt || task.created_at || new Date().getTime(),
+						notes: task.notes || '',
+						suggestions: task.suggestions || '',
+						subtasks: subtasks
+					};
+				});
 				originalTasksOrder = [...tasks];
 				sortTasks();
 			} else {
@@ -215,6 +222,13 @@
 			...(selectedTask.subtasks || []),
 			{ id: Date.now(), text: '', completed: false }
 		];
+		
+		// Recalculate status after adding subtask
+		const newStatus = calculateStatusFromSubtasks(selectedTask.subtasks);
+		if (newStatus) {
+			selectedTask.status = newStatus;
+		}
+		
 		selectedTask = { ...selectedTask };
 	}
 
@@ -223,20 +237,60 @@
 		selectedTask.subtasks = selectedTask.subtasks.filter(
 			(/** @type {{ id: any; }} */ st) => st.id !== subtaskId
 		);
+		
+		// Recalculate status after removing subtask
+		const newStatus = calculateStatusFromSubtasks(selectedTask.subtasks);
+		if (newStatus) {
+			selectedTask.status = newStatus;
+		}
+		
 		selectedTask = { ...selectedTask };
 	}
 
-	function toggleSubtask(subtaskId) {
-		if (!selectedTask || !selectedTask.subtasks) return;
+	function calculateStatusFromSubtasks(subtasks) {
+		if (!subtasks || subtasks.length === 0) {
+			return null; // Don't change status if no subtasks
+		}
+		const completedCount = subtasks.filter((st) => st.completed).length;
+		if (completedCount === 0) {
+			return 'Not Started';
+		} else if (completedCount === subtasks.length) {
+			return 'Completed';
+		} else {
+			return 'In Progress';
+		}
+	}
+
+	async function toggleSubtask(subtaskId) {
+		if (!selectedTask || !selectedTask.subtasks || !userId) return;
 		selectedTask.subtasks = selectedTask.subtasks.map(
 			(/** @type {{ id: any; completed: any; }} */ st) =>
 				st.id === subtaskId ? { ...st, completed: !st.completed } : st
 		);
+		
+		// Update status based on subtasks
+		const newStatus = calculateStatusFromSubtasks(selectedTask.subtasks);
+		if (newStatus) {
+			selectedTask.status = newStatus;
+		}
+		
 		selectedTask = { ...selectedTask };
-	}
-
-	async function saveTaskDetails() {
-		if (!selectedTask || !userId) return;
+		
+		// Update the main tasks array immediately
+		const taskIndex = tasks.findIndex(
+			(/** @type {{ id: any; }} */ t) => t.id === selectedTask.id
+		);
+		if (taskIndex !== -1) {
+			tasks[taskIndex] = {
+				...tasks[taskIndex],
+				subtasks: selectedTask.subtasks,
+				status: selectedTask.status
+			};
+			tasks = [...tasks];
+			sortTasks();
+		}
+		
+		// Auto-save the status and subtasks to backend
 		try {
 			const res = await fetch(`http://localhost:3010/tasks/${selectedTask.id}`, {
 				method: 'PUT',
@@ -244,7 +298,36 @@
 				body: JSON.stringify({
 					notes: selectedTask.notes,
 					suggestions: selectedTask.suggestions,
-					subtasks: selectedTask.subtasks
+					subtasks: selectedTask.subtasks,
+					status: selectedTask.status
+				})
+			});
+			const data = await res.json();
+			if (!data.success) {
+				console.error('Failed to auto-save subtask status:', data.message);
+			}
+		} catch (err) {
+			console.error('Error auto-saving subtask status:', err);
+		}
+	}
+
+	async function saveTaskDetails() {
+		if (!selectedTask || !userId) return;
+		try {
+			// Calculate status from subtasks before saving
+			const newStatus = calculateStatusFromSubtasks(selectedTask.subtasks);
+			if (newStatus) {
+				selectedTask.status = newStatus;
+			}
+			
+			const res = await fetch(`http://localhost:3010/tasks/${selectedTask.id}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					notes: selectedTask.notes,
+					suggestions: selectedTask.suggestions,
+					subtasks: selectedTask.subtasks,
+					status: selectedTask.status
 				})
 			});
 			const data = await res.json();
@@ -258,7 +341,8 @@
 						...tasks[taskIndex],
 						notes: selectedTask.notes,
 						suggestions: selectedTask.suggestions,
-						subtasks: selectedTask.subtasks
+						subtasks: selectedTask.subtasks,
+						status: selectedTask.status
 					};
 					tasks = [...tasks];
 					sortTasks();
@@ -322,18 +406,20 @@
 
 		<div class="flex flex-wrap items-center gap-2 font-['Inter',sans-serif] font-semibold sm:gap-3">
 			<!-- Category -->
-			<div class="flex flex-wrap gap-2">
-				{#each ['all', 'study', 'housework', 'fitness'] as cat}
-					<button
-						on:click={() => (filterByCategory = cat)}
-						class="rounded-lg border-2 px-3 py-1 text-sm font-medium transition-all sm:px-4 sm:py-2 sm:text-base {filterByCategory ===
-						cat
-							? 'border-[#4F3117] bg-[#4F3117] text-white shadow-md'
-							: 'border-[#4F3117] bg-white text-[#4F3117] hover:bg-[#F5E8D9]'}"
-						>{cat[0].toUpperCase() + cat.slice(1)}</button
-					>
-				{/each}
-			</div>
+			<select
+				bind:value={filterByCategory}
+				class="min-w-[180px] rounded-lg border-2 border-[#4F3117] bg-white px-3 py-1 text-sm font-medium text-[#4F3117] transition-all focus:outline-none focus:ring-2 focus:ring-[#4F3117] sm:min-w-[200px] sm:px-4 sm:py-2 sm:text-base"
+			>
+				<option value="all">Select Category</option>
+				<option value="Work">Work</option>
+				<option value="Study">Study</option>
+				<option value="Chores">Chores</option>
+				<option value="Wellness">Wellness</option>
+				<option value="Reading">Reading</option>
+				<option value="Hobbies">Hobbies</option>
+				<option value="Social">Social</option>
+				<option value="Events">Events</option>
+			</select>
 
 			<!-- Sort -->
 			<button
