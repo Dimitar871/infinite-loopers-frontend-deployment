@@ -4,6 +4,7 @@
 
     let { showModal = $bindable(), tasks } = $props();
     let dialog = $state();
+    let incompleteTasks = tasks.filter(task => task.completedAt == null);
 
     let showTimerModal = $state(false);
 
@@ -67,9 +68,9 @@
     </div>
 
     <div class="p-6">
-        {#if tasks && tasks.length > 0}
+        {#if incompleteTasks && incompleteTasks.length > 0}
         <ul class="list-none p-0 m-0 space-y-3">
-            {#each tasks.filter(task => task.completedAt == null) as task}
+            {#each incompleteTasks as task}
             <li>
                 <button
                 onclick={() => selectTask(task)}
@@ -92,7 +93,7 @@
             {/each}
         </ul>
         {:else}
-            <h1>No quests</h1>
+            <h1 class="text-[#4F3117] text-xl">No quests</h1>
         {/if}
     </div>
 </dialog>

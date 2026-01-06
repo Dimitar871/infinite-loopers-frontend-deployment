@@ -1,14 +1,17 @@
 <script>
 	import { page } from '$app/stores';
-	import { openModal } from '../../modalStore.js';
+	import { openModal, isOpen } from '../../modalStore.js';
 	import { onDestroy, onMount } from 'svelte';
 	import { selectedTask } from '../../modalStore.js';
 	import { beforeNavigate } from '$app/navigation';
+
+	import BreakTimer from '$lib/components/BreakTimer.svelte';
 
 	import workBackground from '$lib/assets/work-timer/work-background-1.png';
 	import timerScroll from '$lib/assets/work-timer/timer-scroll.png';
 	import startTimer from '$lib/assets/work-timer/start-timer.png';
 	import questScroll from '$lib/assets/work-timer/quest-scroll.png';
+	import subtaskScroll from '$lib/assets/work-timer/subtask-scroll.png';
 
 	let minutes = 25;
 	let initialSeconds = 0;
@@ -82,9 +85,9 @@
 	}
 
 	function calculateCoins(seconds) {
-    	const baseCoins = 5;
-    	const coinsPerMinute = 2;
-    	return baseCoins + coinsPerMinute * Math.floor(seconds / 60);
+		const baseCoins = 5;
+		const coinsPerMinute = 2;
+		return baseCoins + coinsPerMinute * Math.floor(seconds / 60);
 	}
 
 	function toggleSubtask(subtaskId) {
@@ -168,7 +171,6 @@
 		pause();
 		secondsLeft = 0;
 		shouldWarn = false;
-		showBreakModal = true;
 
 		if (alarmEnabled) {
 			const audio = new Audio(''); // will put an actual alarm later
@@ -176,28 +178,34 @@
 		}
 
 		try {
-			const res = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}/complete`, {
-				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-        			coins: calculateCoins($selectedTask.timeSpent)
-    			})
-			});
-			const data = await res.json();
-			if (data.success) {
-				if (data.unlockedAchievements?.length > 0) {
-					openModal(
-						`🎉 Achievement unlocked: ${data.unlockedAchievements.map((a) => a.name).join(', ')}!`,
-						'success'
-					);
-				}
-			} else {
-				openModal(data.message || 'Failed to complete task', 'error');
-			}
-		} catch (err) {
-			console.error(err);
-			openModal('Failed to complete task', 'error');
-		}
+        const res = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}/complete`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                coins: calculateCoins($selectedTask.timeSpent)
+            })
+        });
+        const data = await res.json();
+
+        if (data.success && data.unlockedAchievements?.length > 0) {
+            openModal(
+                `🎉 Achievement unlocked: ${data.unlockedAchievements.map((a) => a.name).join(', ')}!`,
+                'success'
+            );
+
+            const unsubscribe = isOpen.subscribe((open) => {
+                if (!open) {
+                    showBreakModal = true;
+                    unsubscribe(); 
+                }
+            });
+        } else {
+            showBreakModal = true;
+        }
+    } catch (err) {
+        console.error(err);
+        showBreakModal = true;
+    }
 	}
 
 	onDestroy(() => clearInterval(timer));
@@ -347,31 +355,66 @@
 		</button>
 	</div>
 
-	<p>{$selectedTask.title}</p>
-	<div class="max-h-[200px] space-y-2 overflow-y-auto">
-		{#if $selectedTask.subtasks && $selectedTask.subtasks.length > 0}
-			{#each $selectedTask.subtasks as subtask}
-				<div class="flex items-center gap-2 rounded-lg border-2 border-[#4F3117] bg-white p-3">
-					<input
-						type="checkbox"
-						checked={subtask.completed}
-						onchange={() => toggleSubtask(subtask.id)}
-						class="h-5 w-5 cursor-pointer rounded text-[#4F3117] focus:ring-2 focus:ring-[#4F3117]"
-					/>
-					<input
-						type="text"
-						bind:value={subtask.text}
-						placeholder="Subtask description..."
-						class="flex-1 border-none bg-transparent text-[#4F3117] placeholder-[#A89078] focus:outline-none {subtask.completed
-							? 'text-gray-500 line-through'
-							: ''}"
-					/>
-				</div>
-			{/each}
-		{:else}
-			<p class="text-sm text-gray-500 italic">No subtasks yet.</p>
-		{/if}
-	</div>
+<section 
+    class="mt-8 flex w-full max-w-[700px] flex-col bg-no-repeat bg-size-[100%_100%] px-6 py-8 sm:px-10 sm:py-10 font-['IM_Fell_Great_Primer_SC']"
+    style="background-image: url({questScroll});">
+		<div class="mb-6">
+			<h2 class="text-3xl tracking-tight text-[#4F3117] opacity-90">Current task:</h2>
+			<div class="mt-2 flex items-center gap-3">
+				<h1 class="text-3xl font-bold text-[#4F3117]">
+					{$selectedTask.title}
+				</h1>
+			</div>
+		</div>
+		<p class="mb-2 text-lg font-bold tracking-widest text-[#4F3117] uppercase">
+			Quest Steps
+		</p>
+		<div class="flex flex-col space-y-4">
+			{#if $selectedTask.subtasks && $selectedTask.subtasks.length > 0}
+				{#each $selectedTask.subtasks as subtask}
+					<div
+						class="flex items-center gap-6 bg-size-[100%_100%] bg-no-repeat px-10 py-6"
+						style="background-image: url({subtaskScroll});"
+					>
+						<label class="relative flex cursor-pointer items-center">
+							<input
+								type="checkbox"
+								checked={subtask.completed}
+								onchange={() => toggleSubtask(subtask.id)}
+								class="peer hidden"
+							/>
+							<div
+								class="flex h-7 w-7 items-center justify-center rounded-full bg-[#4F3117] text-[#fdf3e7] transition-all peer-checked:bg-[#4F3117]/60"
+							>
+								{#if subtask.completed}
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-4 w-4"
+										viewBox="0 0 20 20"
+										fill="currentColor"
+									>
+										<path
+											fill-rule="evenodd"
+											d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+											clip-rule="evenodd"
+										/>
+									</svg>
+								{/if}
+							</div>
+						</label>
+
+						<span
+							class="flex-1 text-xl tracking-wider text-[#4F3117] select-none
+                    		{subtask.completed ? 'line-through decoration-1 opacity-40' : ''}">
+							{subtask.text}
+						</span>
+					</div>
+				{/each}
+			{:else}
+				<p class="text-lg text-[#4F3117] italic opacity-50">No subtasks recorded.</p>
+			{/if}
+		</div>
+	</section>
 </div>
 
 {#if showWarningModal}
@@ -413,4 +456,8 @@
 			</div>
 		</article>
 	</div>
+{/if}
+
+{#if showBreakModal}
+    <BreakTimer bind:showModal={showBreakModal} />
 {/if}
