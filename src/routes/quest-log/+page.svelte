@@ -539,146 +539,129 @@
 {/if}
 
 {#if showDetailModal && selectedTask}
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-		on:click={closeDetailModal}
-		on:keydown={(e) => e.key === 'Escape' && closeDetailModal()}
-		role="button"
-		tabindex="0"
-	>
-		<div
-			class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border-2 border-[#4F3117] bg-[#F8F3ED] p-6 shadow-2xl"
-			on:click|stopPropagation
-			on:keydown|stopPropagation
-			role="dialog"
-			tabindex="-1"
-		>
-			<!-- header with close button -->
-			<div class="mb-6 flex items-center justify-between">
-				<h2 class="font-serif text-2xl text-[#4F3117] sm:text-3xl">{selectedTask.title}</h2>
-				<button
-					on:click={closeDetailModal}
-					class="text-2xl font-bold text-[#4F3117] transition-colors hover:text-[#3E2612]"
-					aria-label="Close"
-				>
-					×
-				</button>
-			</div>
+    <div
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2"
+        on:click={closeDetailModal}
+        on:keydown={(e) => e.key === 'Escape' && closeDetailModal()}
+        role="button"
+        tabindex="0"
+    >
+        <div
+            class="w-full max-w-[90vw] max-h-[90vh] overflow-y-auto rounded-xl border-6 border-double border-[#ad8a6c] bg-[#fdf3e7] font-['IM_Fell_Great_Primer_SC'] shadow-[0_0_20px_rgba(0,0,0,0.5)] md:w-[600px]"
+            on:click|stopPropagation
+            on:keydown|stopPropagation
+            role="dialog"
+            tabindex="-1"
+        >
+            <div class="flex items-center justify-between border-b-2 border-[#ad8a6c] px-4 py-3 text-[#4F3117]">
+                <h2 class="text-2xl sm:text-3xl">{selectedTask.title}</h2>
+                <button
+                    on:click={closeDetailModal}
+                    class="text-2xl transition-transform hover:rotate-12"
+                    aria-label="Close"
+                >✖</button>
+            </div>
 
-			<!-- info of task -->
-			<div class="mb-6 grid grid-cols-2 gap-4 text-sm sm:text-base">
-				<div>
-					<span class="font-semibold text-[#4F3117]">Priority:</span>
-					<span
-						class={selectedTask.priority === 'High'
-							? 'ml-2 font-bold text-red-600'
-							: selectedTask.priority === 'Medium'
-								? 'ml-2 text-orange-600'
-								: 'ml-2 text-green-600'}
-					>
-						{selectedTask.priority || 'Medium'}
-					</span>
-				</div>
-				<div>
-					<span class="font-semibold text-[#4F3117]">Category:</span>
-					<span class="ml-2 text-[#4F3117]">{selectedTask.category || 'N/A'}</span>
-				</div>
-				<div>
-					<span class="font-semibold text-[#4F3117]">End Date:</span>
-					<span class="ml-2 text-[#4F3117]">{selectedTask.end || 'No date set'}</span>
-				</div>
-				<div>
-					<span class="font-semibold text-[#4F3117]">Status:</span>
-					<span class="ml-2 text-[#4F3117]">{selectedTask.status}</span>
-				</div>
-			</div>
+            <div class="space-y-4 p-4 text-[#4F3117] sm:p-6">
+                
+                <div class="grid grid-cols-2 gap-4 rounded-lg border-2 border-[#ad8a6c]/30 bg-[#f1e0c5]/30 p-3">
+                    <div>
+                        <span class="opacity-70 text-base">Priority:</span>
+                        <span class="block text-xl {selectedTask.priority === 'High' ? 'text-red-700 font-bold' : 'text-[#4F3117]'}">
+                            {selectedTask.priority || 'Medium'}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="opacity-70 text-base">Category:</span>
+                        <span class="block text-xl">{selectedTask.category || 'N/A'}</span>
+                    </div>
+                    <div>
+                        <span class="opacity-70 text-base">End Date:</span>
+                        <span class="block text-xl">{selectedTask.end || 'No date set'}</span>
+                    </div>
+                    <div>
+                        <span class="opacity-70 text-base">Status:</span>
+                        <span class="block text-xl">{selectedTask.status}</span>
+                    </div>
+                </div>
 
-			<!-- fied to add notes -->
-			<div class="mb-6">
-				<label for="notes" class="mb-2 block text-lg font-semibold text-[#4F3117]">Notes</label>
-				<textarea
-					id="notes"
-					bind:value={selectedTask.notes}
-					placeholder="Add your notes here..."
-					class="min-h-[100px] w-full resize-y rounded-lg border-2 border-[#4F3117] bg-white p-3 text-[#4F3117] placeholder-[#A89078] focus:ring-2 focus:ring-[#4F3117] focus:outline-none"
-				></textarea>
-			</div>
+                <div>
+                    <label for="notes" class="mb-1 block text-xl">Notes</label>
+                    <textarea
+                        id="notes"
+                        bind:value={selectedTask.notes}
+                        placeholder="Add your notes here..."
+                        class="min-h-20 w-full rounded border-2 border-[#ad8a6c] bg-[#fff8e1] p-2 text-lg focus:ring-2 focus:ring-[#ad8a6c] focus:outline-none"
+                    ></textarea>
+                </div>
 
-			<!-- add suggestions -->
-			<div class="mb-6">
-				<label for="suggestions" class="mb-2 block text-lg font-semibold text-[#4F3117]"
-					>Suggestions</label
-				>
-				<textarea
-					id="suggestions"
-					bind:value={selectedTask.suggestions}
-					placeholder="Add suggestions or tips here..."
-					class="min-h-[100px] w-full resize-y rounded-lg border-2 border-[#4F3117] bg-white p-3 text-[#4F3117] placeholder-[#A89078] focus:ring-2 focus:ring-[#4F3117] focus:outline-none"
-				></textarea>
-			</div>
+                <div>
+                    <label for="suggestions" class="mb-1 block text-xl">Suggestions</label>
+                    <textarea
+                        id="suggestions"
+                        bind:value={selectedTask.suggestions}
+                        placeholder="Add suggestions or tips..."
+                        class="min-h-20 w-full rounded border-2 border-[#ad8a6c] bg-[#fff8e1] p-2 text-lg focus:ring-2 focus:ring-[#ad8a6c] focus:outline-none"
+                    ></textarea>
+                </div>
 
-			<!-- add subtasks/test version -->
-			<div class="mb-6">
-				<div class="mb-3 flex items-center justify-between">
-					<h3 class="block text-lg font-semibold text-[#4F3117]">Subtasks</h3>
-					<button
-						on:click={addSubtask}
-						class="rounded-lg bg-[#4F3117] px-3 py-1.5 text-sm text-white transition-colors hover:bg-[#3E2612]"
-					>
-						+ Add Subtask
-					</button>
-				</div>
-				<div class="max-h-[200px] space-y-2 overflow-y-auto">
-					{#if selectedTask.subtasks && selectedTask.subtasks.length > 0}
-						{#each selectedTask.subtasks as subtask}
-							<div
-								class="flex items-center gap-2 rounded-lg border-2 border-[#4F3117] bg-white p-3"
-							>
-								<input
-									type="checkbox"
-									checked={subtask.completed}
-									on:change={() => toggleSubtask(subtask.id)}
-									class="h-5 w-5 cursor-pointer rounded text-[#4F3117] focus:ring-2 focus:ring-[#4F3117]"
-								/>
-								<input
-									type="text"
-									bind:value={subtask.text}
-									placeholder="Subtask description..."
-									class="flex-1 border-none bg-transparent text-[#4F3117] placeholder-[#A89078] focus:outline-none {subtask.completed
-										? 'text-gray-500 line-through'
-										: ''}"
-								/>
-								<button
-									on:click={() => removeSubtask(subtask.id)}
-									class="text-lg font-bold text-red-600 transition-colors hover:text-red-800"
-									aria-label="Remove subtask"
-								>
-									×
-								</button>
-							</div>
-						{/each}
-					{:else}
-						<p class="text-sm text-gray-500 italic">
-							No subtasks yet. Click "Add Subtask" to create one.
-						</p>
-					{/if}
-				</div>
-			</div>
+                <div>
+                    <div class="mb-3 flex items-center justify-between">
+                        <h3 class="text-xl">Subtasks</h3>
+                        <button
+                            on:click={addSubtask}
+                            class="rounded-lg bg-[#4F3117] px-3 py-1.5 text-base text-white transition-colors hover:bg-[#3E2612]"
+                        >
+                            + Add Subtask
+                        </button>
+                    </div>
+                    
+                    <div class="max-h-[200px] space-y-2 overflow-y-auto">
+                        {#if selectedTask.subtasks && selectedTask.subtasks.length > 0}
+                            {#each selectedTask.subtasks as subtask}
+                                <div class="flex items-center gap-2 rounded border-2 border-[#ad8a6c] bg-[#fff8e1] p-3 shadow-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={subtask.completed}
+                                        on:change={() => toggleSubtask(subtask.id)}
+                                        class="h-5 w-5 cursor-pointer rounded text-[#4F3117] focus:ring-2 focus:ring-[#4F3117]"
+                                    />
+                                    <input
+                                        type="text"
+                                        bind:value={subtask.text}
+                                        placeholder="Subtask description..."
+                                        class="flex-1 border-none bg-transparent text-xl text-[#4F3117] placeholder-[#A89078] focus:outline-none {subtask.completed ? 'text-gray-500 line-through' : ''}"
+                                    />
+                                    <button
+                                        on:click={() => removeSubtask(subtask.id)}
+                                        class="text-lg font-bold text-red-600 transition-colors hover:text-red-800"
+                                        aria-label="Remove subtask"
+                                    >×</button>
+                                </div>
+                            {/each}
+                        {:else}
+                            <p class="text-lg italic text-gray-500">
+                                No subtasks yet.
+                            </p>
+                        {/if}
+                    </div>
+                </div>
 
-			<div class="flex gap-3">
-				<button
-					on:click={saveTaskDetails}
-					class="flex-1 rounded-lg bg-[#4F3117] py-2.5 font-medium text-white transition-colors hover:bg-[#3E2612]"
-				>
-					Save Changes
-				</button>
-				<button
-					on:click={closeDetailModal}
-					class="flex-1 rounded-lg bg-gray-300 py-2.5 font-medium text-[#4F3117] transition-colors hover:bg-gray-400"
-				>
-					Cancel
-				</button>
-			</div>
-		</div>
-	</div>
+                <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+                    <button
+                        on:click={saveTaskDetails}
+                        class="flex-1 rounded-lg border-2 border-[#ad8a6c] bg-[#fff8e1] py-2 text-xl hover:bg-[#f1e0c5]"
+                    >
+                        Save Changes
+                    </button>
+                    <button
+                        on:click={closeDetailModal}
+                        class="flex-1 rounded-lg border-2 border-[#ad8a6c] bg-[#fff8e1] py-2 text-xl hover:bg-[#d2c1aa]"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 {/if}
