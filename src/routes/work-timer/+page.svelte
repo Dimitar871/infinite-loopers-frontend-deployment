@@ -216,10 +216,11 @@
 		.padStart(2, '0')}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
 </script>
 
+<div class="flex flex-col items-center min-h-screen bg-[#fdf3e7] pb-20">
 <section
-	class="relative grid place-items-center border-b-2 border-[#4F3117]"
-	style={`background-image: url(${workBackground}); background-size: cover; background-position: center;`}
->
+        class="relative grid w-full place-items-center border-b-2 border-[#4F3117] min-h-[400px] sm:min-h-[500px] lg:min-h-[600px]"
+        style={`background-image: url(${workBackground}); background-size: cover; background-position: center;`}
+    >
 	<div class="relative aspect-square w-full max-w-[700px] overflow-hidden">
 		<div class="absolute top-4 left-1/2 z-20 -translate-x-1/2 sm:top-6">
 			<div
@@ -416,6 +417,7 @@
 		</div>
 	</section>
 </div>
+</div>
 
 {#if showWarningModal}
 	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -459,5 +461,7 @@
 {/if}
 
 {#if showBreakModal}
-    <BreakTimer bind:showModal={showBreakModal} />
+    <BreakTimer 
+	bind:showModal={showBreakModal} 
+	onReset={resetTimer}/>
 {/if}
