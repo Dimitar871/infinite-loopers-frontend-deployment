@@ -86,9 +86,9 @@
 
 <div class="min-h-screen" style="background-color: #B5A490;">
 	<!-- STATS BAR -->
-	<div class="mx-auto max-w-7xl px-6 pt-6 pb-6">
+	<div class="mx-auto max-w-7xl px-4 pt-4 pb-4 sm:px-6 sm:pt-6 sm:pb-6">
 		<div
-			class="relative px-12 py-8 shadow-xl"
+			class="relative px-4 py-4 shadow-xl sm:px-8 sm:py-6 md:px-12 md:py-8"
 			style="background-image: url({achievementsRectangle}); background-size: 100% 100%; background-position: center; background-repeat: no-repeat;"
 		>
 			<!-- Torn paper effect -->
@@ -97,34 +97,34 @@
 				style="background: linear-gradient(90deg, transparent 0%, transparent 40%, #B5A490 40%, #B5A490 60%, transparent 60%, transparent 100%); background-size: 20px 100%;"
 			></div>
 
-			<div class="grid grid-cols-3 gap-8 text-center">
+			<div class="grid grid-cols-1 gap-4 text-center sm:grid-cols-3 sm:gap-8">
 				<div>
 					<div
-						class="mb-3 font-serif text-base font-medium tracking-wider text-[#4F3117] uppercase"
+						class="mb-2 font-serif text-xs font-medium tracking-wider text-[#4F3117] uppercase sm:mb-3 sm:text-base"
 					>
 						Achievements<br />Unlocked
 					</div>
-					<div class="font-serif text-6xl font-bold text-[#3E2612]">
+					<div class="font-serif text-3xl font-bold text-[#3E2612] sm:text-4xl md:text-6xl">
 						{stats.achievementsUnlocked}/{stats.totalAchievements}
 					</div>
 				</div>
 				<div>
 					<div
-						class="mb-3 font-serif text-base font-medium tracking-wider text-[#4F3117] uppercase"
+						class="mb-2 font-serif text-xs font-medium tracking-wider text-[#4F3117] uppercase sm:mb-3 sm:text-base"
 					>
 						Completion<br />Rate
 					</div>
-					<div class="font-serif text-6xl font-bold text-[#3E2612]">
+					<div class="font-serif text-3xl font-bold text-[#3E2612] sm:text-4xl md:text-6xl">
 						{stats.completionRate}%
 					</div>
 				</div>
 				<div>
 					<div
-						class="mb-3 font-serif text-base font-medium tracking-wider text-[#4F3117] uppercase"
+						class="mb-2 font-serif text-xs font-medium tracking-wider text-[#4F3117] uppercase sm:mb-3 sm:text-base"
 					>
 						Total<br />XP
 					</div>
-					<div class="font-serif text-6xl font-bold text-[#3E2612]">
+					<div class="font-serif text-3xl font-bold text-[#3E2612] sm:text-4xl md:text-6xl">
 						{stats.totalXP}
 					</div>
 				</div>
@@ -134,9 +134,9 @@
 
 	<!-- ACHIEVEMENTS SECTION -->
 	<div class="pb-6" style="background-color: #E3D3BF;">
-		<div class="mx-auto max-w-7xl px-6 py-6">
-			<h2 class="mb-2 text-center font-serif text-5xl font-bold text-[#3E2612]">Achievements</h2>
-			<p class="mb-6 text-center font-serif text-base tracking-widest text-[#4F3117] uppercase">
+		<div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6">
+			<h2 class="mb-2 text-center font-serif text-3xl font-bold text-[#3E2612] sm:text-4xl md:text-5xl">Achievements</h2>
+			<p class="mb-4 text-center font-serif text-sm tracking-widest text-[#4F3117] uppercase sm:mb-6 sm:text-base">
 				Unlock badges and milestones
 			</p>
 
@@ -162,130 +162,130 @@
 					</div>
 				</div>
 
-				<div class="space-y-5">
+				<div class="space-y-4 sm:space-y-5">
 					<!-- Row 1 -->
-					<div class="flex justify-end gap-5">
+					<div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-5 xl:justify-end">
 						{#each achievements.slice(0, 2) as ach}
 							<button
 								type="button"
 								on:click={() => handleAchievementClick(ach)}
-								class="relative aspect-square w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-7 shadow-xl transition-transform hover:-translate-y-0.5"
+								class="relative w-full max-w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-5 pb-20 shadow-xl transition-transform hover:-translate-y-0.5 sm:aspect-square sm:w-[380px] sm:p-7 sm:pb-7"
 								style="border: 5px solid #6e5c3d;"
 							>
 								{#if ach.unlocked}
 									<span
-										class="absolute top-4 right-4 rounded-md bg-[#EEE9E1] px-4 py-2 text-sm font-bold tracking-wide text-[#3E2612] uppercase"
+										class="absolute top-3 right-3 rounded-md bg-[#EEE9E1] px-3 py-1.5 text-xs font-bold tracking-wide text-[#3E2612] uppercase sm:top-4 sm:right-4 sm:px-4 sm:py-2 sm:text-sm"
 										style="border: 2px solid #8B7355;"
 									>
 										Unlocked
 									</span>
 								{/if}
 
-								<h2 class="mb-3 font-serif text-2xl font-bold text-[#3E2612]">{ach.name}</h2>
-								<p class="mb-3 text-base leading-relaxed text-[#5C4633]">{ach.description}</p>
+								<h2 class="mb-2 pr-20 font-serif text-xl font-bold text-[#3E2612] sm:mb-3 sm:pr-0 sm:text-2xl">{ach.name}</h2>
+								<p class="mb-2 text-sm leading-relaxed text-[#5C4633] sm:mb-3 sm:text-base">{ach.description}</p>
 
-								<div class="absolute right-6 bottom-6 left-6 flex items-center justify-between">
-									<span class="text-base font-semibold text-[#3E2612]"
+								<div class="absolute right-4 bottom-4 left-4 flex items-center justify-between sm:right-6 sm:bottom-6 sm:left-6">
+									<span class="text-sm font-semibold text-[#3E2612] sm:text-base"
 										>{ach.icon}
 										{ach.points} points</span
 									>
-									<img src={medal} alt="Medal" class="h-34 w-34" />
+									<img src={medal} alt="Medal" class="h-16 w-16 sm:h-34 sm:w-34" />
 								</div>
 							</button>
 						{/each}
 					</div>
 
 					<!-- Row 2 -->
-					<div class="flex justify-end gap-5">
+					<div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-5 xl:justify-end">
 						{#each achievements.slice(2, 4) as ach}
 							<button
 								type="button"
 								on:click={() => handleAchievementClick(ach)}
-								class="relative aspect-square w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-7 shadow-xl transition-transform hover:-translate-y-0.5"
+								class="relative w-full max-w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-5 pb-20 shadow-xl transition-transform hover:-translate-y-0.5 sm:aspect-square sm:w-[380px] sm:p-7 sm:pb-7"
 								style="border: 5px solid #6e5c3d;"
 							>
 								{#if ach.unlocked}
 									<span
-										class="absolute top-4 right-4 rounded-md bg-[#EEE9E1] px-4 py-2 text-sm font-bold tracking-wide text-[#3E2612] uppercase"
+										class="absolute top-3 right-3 rounded-md bg-[#EEE9E1] px-3 py-1.5 text-xs font-bold tracking-wide text-[#3E2612] uppercase sm:top-4 sm:right-4 sm:px-4 sm:py-2 sm:text-sm"
 										style="border: 2px solid #8B7355;"
 									>
 										Unlocked
 									</span>
 								{/if}
 
-								<h2 class="mb-3 font-serif text-2xl font-bold text-[#3E2612]">{ach.name}</h2>
-								<p class="mb-3 text-base leading-relaxed text-[#5C4633]">{ach.description}</p>
+								<h2 class="mb-2 pr-20 font-serif text-xl font-bold text-[#3E2612] sm:mb-3 sm:pr-0 sm:text-2xl">{ach.name}</h2>
+								<p class="mb-2 text-sm leading-relaxed text-[#5C4633] sm:mb-3 sm:text-base">{ach.description}</p>
 
-								<div class="absolute right-6 bottom-6 left-6 flex items-center justify-between">
-									<span class="text-base font-semibold text-[#3E2612]"
+								<div class="absolute right-4 bottom-4 left-4 flex items-center justify-between sm:right-6 sm:bottom-6 sm:left-6">
+									<span class="text-sm font-semibold text-[#3E2612] sm:text-base"
 										>{ach.icon}
 										{ach.points} points</span
 									>
-									<img src={medal} alt="Medal" class="h-34 w-34" />
+									<img src={medal} alt="Medal" class="h-16 w-16 sm:h-34 sm:w-34" />
 								</div>
 							</button>
 						{/each}
 					</div>
 
 					<!-- Row 3 - aligned LEFT -->
-					<div class="flex justify-start gap-5">
+					<div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-5 xl:justify-start">
 						{#each achievements.slice(4, 6) as ach}
 							<button
 								type="button"
 								on:click={() => handleAchievementClick(ach)}
-								class="relative aspect-square w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-7 shadow-xl transition-transform hover:-translate-y-0.5"
+								class="relative w-full max-w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-5 pb-20 shadow-xl transition-transform hover:-translate-y-0.5 sm:aspect-square sm:w-[380px] sm:p-7 sm:pb-7"
 								style="border: 5px solid #6e5c3d;"
 							>
 								{#if ach.unlocked}
 									<span
-										class="absolute top-4 right-4 rounded-md bg-[#EEE9E1] px-4 py-2 text-sm font-bold tracking-wide text-[#3E2612] uppercase"
+										class="absolute top-3 right-3 rounded-md bg-[#EEE9E1] px-3 py-1.5 text-xs font-bold tracking-wide text-[#3E2612] uppercase sm:top-4 sm:right-4 sm:px-4 sm:py-2 sm:text-sm"
 										style="border: 2px solid #8B7355;"
 									>
 										Unlocked
 									</span>
 								{/if}
 
-								<h2 class="mb-3 font-serif text-2xl font-bold text-[#3E2612]">{ach.name}</h2>
-								<p class="mb-3 text-base leading-relaxed text-[#5C4633]">{ach.description}</p>
+								<h2 class="mb-2 pr-20 font-serif text-xl font-bold text-[#3E2612] sm:mb-3 sm:pr-0 sm:text-2xl">{ach.name}</h2>
+								<p class="mb-2 text-sm leading-relaxed text-[#5C4633] sm:mb-3 sm:text-base">{ach.description}</p>
 
-								<div class="absolute right-6 bottom-6 left-6 flex items-center justify-between">
-									<span class="text-base font-semibold text-[#3E2612]"
+								<div class="absolute right-4 bottom-4 left-4 flex items-center justify-between sm:right-6 sm:bottom-6 sm:left-6">
+									<span class="text-sm font-semibold text-[#3E2612] sm:text-base"
 										>{ach.icon}
 										{ach.points} points</span
 									>
-									<img src={medal} alt="Medal" class="h-34 w-34" />
+									<img src={medal} alt="Medal" class="h-16 w-16 sm:h-34 sm:w-34" />
 								</div>
 							</button>
 						{/each}
 					</div>
 
 					<!-- Row 4 - aligned LEFT -->
-					<div class="flex justify-start gap-5">
+					<div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-5 xl:justify-start">
 						{#each achievements.slice(6, 8) as ach}
 							<button
 								type="button"
 								on:click={() => handleAchievementClick(ach)}
-								class="relative aspect-square w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-7 shadow-xl transition-transform hover:-translate-y-0.5"
+								class="relative w-full max-w-[380px] cursor-pointer rounded-lg bg-[#F5EFE6] p-5 pb-20 shadow-xl transition-transform hover:-translate-y-0.5 sm:aspect-square sm:w-[380px] sm:p-7 sm:pb-7"
 								style="border: 5px solid #6e5c3d;"
 							>
 								{#if ach.unlocked}
 									<span
-										class="absolute top-4 right-4 rounded-md bg-[#EEE9E1] px-4 py-2 text-sm font-bold tracking-wide text-[#3E2612] uppercase"
+										class="absolute top-3 right-3 rounded-md bg-[#EEE9E1] px-3 py-1.5 text-xs font-bold tracking-wide text-[#3E2612] uppercase sm:top-4 sm:right-4 sm:px-4 sm:py-2 sm:text-sm"
 										style="border: 2px solid #8B7355;"
 									>
 										Unlocked
 									</span>
 								{/if}
 
-								<h2 class="mb-3 font-serif text-2xl font-bold text-[#3E2612]">{ach.name}</h2>
-								<p class="mb-3 text-base leading-relaxed text-[#5C4633]">{ach.description}</p>
+								<h2 class="mb-2 pr-20 font-serif text-xl font-bold text-[#3E2612] sm:mb-3 sm:pr-0 sm:text-2xl">{ach.name}</h2>
+								<p class="mb-2 text-sm leading-relaxed text-[#5C4633] sm:mb-3 sm:text-base">{ach.description}</p>
 
-								<div class="absolute right-6 bottom-6 left-6 flex items-center justify-between">
-									<span class="text-base font-semibold text-[#3E2612]"
+								<div class="absolute right-4 bottom-4 left-4 flex items-center justify-between sm:right-6 sm:bottom-6 sm:left-6">
+									<span class="text-sm font-semibold text-[#3E2612] sm:text-base"
 										>{ach.icon}
 										{ach.points} points</span
 									>
-									<img src={medal} alt="Medal" class="h-34 w-34" />
+									<img src={medal} alt="Medal" class="h-16 w-16 sm:h-34 sm:w-34" />
 								</div>
 							</button>
 						{/each}
