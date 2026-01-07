@@ -177,36 +177,54 @@
 			audio.play();
 		}
 
-		try {
-			const res = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}/complete`, {
-				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					coins: calculateCoins($selectedTask.timeSpent)
-				})
-			});
-			const data = await res.json();
+		const earned = calculateCoins(initialSeconds); 
+        const userId = localStorage.getItem('userId');
 
-			if (data.success && data.unlockedAchievements?.length > 0) {
-				openModal(
-					`🎉 Achievement unlocked: ${data.unlockedAchievements.map((a) => a.name).join(', ')}!`,
-					'success'
-				);
-
-				const unsubscribe = isOpen.subscribe((open) => {
-					if (!open) {
-						showBreakModal = true;
-						unsubscribe();
-					}
-				});
-			} else {
-				showBreakModal = true;
-			}
-		} catch (err) {
-			console.error(err);
-			showBreakModal = true;
+		if (!userId) {
+    		console.error("User does not exist.");
+    		return;
 		}
-	}
+
+		try {
+            const coinRes = await fetch(`http://localhost:3012/users/${userId}/add-coins`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: earned })
+            });
+            const coinData = await coinRes.json();
+
+            const taskRes = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}/complete`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const taskData = await taskRes.json();
+
+            let message = `Quest Complete!\n`;
+			message += `You earned 🪙 ${earned} coins.`
+            
+            if (coinData.success) {
+                message += `Your new balance: ${coinData.newTotal}\n`;
+            }
+
+            if (taskData.unlockedAchievements && taskData.unlockedAchievements.length > 0) {
+                const names = taskData.unlockedAchievements.map(a => a.name).join(', ');
+                message += `\n🏆 Achievements Unlocked: ${names}!`;
+            }
+
+            openModal(message, 'success');
+
+            const unsubscribe = isOpen.subscribe((open) => {
+                if (!open) {
+                    showBreakModal = true;
+                    unsubscribe();
+                }
+            });
+
+        } catch (err) {
+            console.error("Failed to finish quest:", err);
+            showBreakModal = true;
+        }
+    }
 
 	onDestroy(() => clearInterval(timer));
 	onMount(() => start());
