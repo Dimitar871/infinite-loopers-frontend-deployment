@@ -6,6 +6,7 @@
 	import { beforeNavigate } from '$app/navigation';
 
 	import BreakTimer from '$lib/components/BreakTimer.svelte';
+	import EditSession from '$lib/components/EditSession.svelte';
 
 	import workBackground from '$lib/assets/work-timer/work-background-1.png';
 	import timerScroll from '$lib/assets/work-timer/timer-scroll.png';
@@ -21,6 +22,7 @@
 	let initialized = false;
 	let alarmEnabled = true;
 	let showBreakModal = false;
+	let showEditModal = false;
 
 	let shouldWarn = true;
 	let showWarningModal = false;
@@ -143,27 +145,25 @@
 		secondsLeft = initialSeconds;
 	}
 
-	async function editSession() {
+	function openEditModal() {
 		if (running) return;
+		showEditModal = true;
+	}
 
-		const input = prompt('Edit session length (minutes):', minutes);
-		const m = Number(input);
-
-		if (m >= 1) {
-			minutes = m;
-			initialSeconds = minutes * 60;
-			secondsLeft = initialSeconds;
-			try {
-				const response = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}`, {
-					method: 'PUT',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						duration: initialSeconds
-					})
-				});
-			} catch (err) {
-				console.error(err);
-			}
+	async function editSession(newMinutes) {
+		minutes = Number(newMinutes);
+		initialSeconds = minutes * 60;
+		secondsLeft = initialSeconds;
+		try {
+			const response = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					duration: initialSeconds
+				})
+			});
+		} catch (err) {
+			console.error(err);
 		}
 	}
 
@@ -178,34 +178,34 @@
 		}
 
 		try {
-        const res = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}/complete`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                coins: calculateCoins($selectedTask.timeSpent)
-            })
-        });
-        const data = await res.json();
+			const res = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}/complete`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					coins: calculateCoins($selectedTask.timeSpent)
+				})
+			});
+			const data = await res.json();
 
-        if (data.success && data.unlockedAchievements?.length > 0) {
-            openModal(
-                `🎉 Achievement unlocked: ${data.unlockedAchievements.map((a) => a.name).join(', ')}!`,
-                'success'
-            );
+			if (data.success && data.unlockedAchievements?.length > 0) {
+				openModal(
+					`🎉 Achievement unlocked: ${data.unlockedAchievements.map((a) => a.name).join(', ')}!`,
+					'success'
+				);
 
-            const unsubscribe = isOpen.subscribe((open) => {
-                if (!open) {
-                    showBreakModal = true;
-                    unsubscribe(); 
-                }
-            });
-        } else {
-            showBreakModal = true;
-        }
-    } catch (err) {
-        console.error(err);
-        showBreakModal = true;
-    }
+				const unsubscribe = isOpen.subscribe((open) => {
+					if (!open) {
+						showBreakModal = true;
+						unsubscribe();
+					}
+				});
+			} else {
+				showBreakModal = true;
+			}
+		} catch (err) {
+			console.error(err);
+			showBreakModal = true;
+		}
 	}
 
 	onDestroy(() => clearInterval(timer));
@@ -216,45 +216,45 @@
 		.padStart(2, '0')}:${(secondsLeft % 60).toString().padStart(2, '0')}`;
 </script>
 
-<div class="flex flex-col items-center min-h-screen bg-[#fdf3e7] pb-20">
-<section
-        class="relative grid w-full place-items-center border-b-2 border-[#4F3117] min-h-[400px] sm:min-h-[500px] lg:min-h-[600px]"
-        style={`background-image: url(${workBackground}); background-size: cover; background-position: center;`}
-    >
-	<div class="relative aspect-square w-full max-w-[700px] overflow-hidden">
-		<div class="absolute top-4 left-1/2 z-20 -translate-x-1/2 sm:top-6">
-			<div
-				class="
+<div class="flex min-h-screen flex-col items-center bg-[#fdf3e7] pb-20">
+	<section
+		class="relative grid min-h-[400px] w-full place-items-center border-b-2 border-[#4F3117] sm:min-h-[500px] lg:min-h-[600px]"
+		style={`background-image: url(${workBackground}); background-size: cover; background-position: center;`}
+	>
+		<div class="relative aspect-square w-full max-w-[700px] overflow-hidden">
+			<div class="absolute top-4 left-1/2 z-20 -translate-x-1/2 sm:top-6">
+				<div
+					class="
 				relative flex h-[110px] w-[220px]
 				items-center justify-center
 				sm:h-[140px] sm:w-[280px]
 				lg:h-[170px] lg:w-[340px]
 			"
-				style={`background-image: url(${timerScroll});
+					style={`background-image: url(${timerScroll});
 			        background-size: contain;
 			        background-repeat: no-repeat;
 			        background-position: center;`}
-			>
-				<span
-					class="
+				>
+					<span
+						class="
 		relative
 		-translate-y-2 font-['IM_Fell_Great_Primer_SC'] text-xl
 		tracking-wide
 		text-[#4F3117]
 		sm:-translate-y-2.5
 		sm:text-2xl lg:-translate-y-3 lg:text-3xl"
-				>
-					{display}
-				</span>
+					>
+						{display}
+					</span>
+				</div>
 			</div>
 		</div>
-	</div>
-</section>
+	</section>
 
-<div class="mt-6 flex flex-col items-center gap-0 sm:mt-8">
-	<button
-		onclick={toggleTimer}
-		class="
+	<div class="mt-6 flex flex-col items-center gap-0 sm:mt-8">
+		<button
+			onclick={toggleTimer}
+			class="
 			flex h-[100px]
 			w-[200px] cursor-pointer
 			items-center justify-center
@@ -272,19 +272,19 @@
 
 			md:text-4xl
 		"
-		style={`background-image: url(${startTimer});
+			style={`background-image: url(${startTimer});
 		        background-size: contain;
 		        background-position: center;
 		        background-repeat: no-repeat;`}
-	>
-		{running ? 'Stop Timer' : 'Start Timer'}
-	</button>
+		>
+			{running ? 'Stop Timer' : 'Start Timer'}
+		</button>
 
-	<div class="-mt-4 flex flex-wrap justify-center gap-3 sm:-mt-6">
-		<button
-			onclick={editSession}
-			disabled={running}
-			class="
+		<div class="-mt-4 flex flex-wrap justify-center gap-3 sm:-mt-6">
+			<button
+				onclick={openEditModal}
+				disabled={running}
+				class="
 				flex h-[70px] w-[140px]
 				cursor-pointer items-center
 				justify-center
@@ -299,17 +299,17 @@
 
 				sm:h-20 sm:w-40 sm:text-xl
 			"
-			style={`background-image: url(${startTimer});
+				style={`background-image: url(${startTimer});
 			        background-size: contain;
 			        background-position: center;
 			        background-repeat: no-repeat;`}
-		>
-			Edit Session
-		</button>
+			>
+				Edit Session
+			</button>
 
-		<button
-			onclick={resetTimer}
-			class="
+			<button
+				onclick={resetTimer}
+				class="
 				flex h-[70px] w-[140px]
 				cursor-pointer items-center
 				justify-center
@@ -323,17 +323,17 @@
 
 				sm:h-20 sm:w-40 sm:text-xl
 			"
-			style={`background-image: url(${startTimer});
+				style={`background-image: url(${startTimer});
 			        background-size: contain;
 			        background-position: center;
 			        background-repeat: no-repeat;`}
-		>
-			Reset Timer
-		</button>
+			>
+				Reset Timer
+			</button>
 
-		<button
-			onclick={() => (alarmEnabled = !alarmEnabled)}
-			class="
+			<button
+				onclick={() => (alarmEnabled = !alarmEnabled)}
+				class="
 				flex h-[70px] w-[140px]
 				cursor-pointer items-center
 				justify-center
@@ -347,76 +347,76 @@
 
 				sm:h-20 sm:w-40 sm:text-xl
 			"
-			style={`background-image: url(${startTimer});
+				style={`background-image: url(${startTimer});
 			        background-size: contain;
 			        background-position: center;
 			        background-repeat: no-repeat;`}
-		>
-			Alarm: {alarmEnabled ? 'On' : 'Off'}
-		</button>
-	</div>
+			>
+				Alarm: {alarmEnabled ? 'On' : 'Off'}
+			</button>
+		</div>
 
-<section 
-    class="mt-8 flex w-full max-w-[700px] flex-col bg-no-repeat bg-size-[100%_100%] px-6 py-8 sm:px-10 sm:py-10 font-['IM_Fell_Great_Primer_SC']"
-    style="background-image: url({questScroll});">
-		<div class="mb-6">
-			<h2 class="text-3xl tracking-tight text-[#4F3117] opacity-90">Current task:</h2>
-			<div class="mt-2 flex items-center gap-3">
-				<h1 class="text-3xl font-bold text-[#4F3117]">
-					{$selectedTask.title}
-				</h1>
+		<section
+			class="mt-8 flex w-full max-w-[700px] flex-col bg-size-[100%_100%] bg-no-repeat px-6 py-8 font-['IM_Fell_Great_Primer_SC'] sm:px-10 sm:py-10"
+			style="background-image: url({questScroll});"
+		>
+			<div class="mb-6">
+				<h2 class="text-3xl tracking-tight text-[#4F3117] opacity-90">Current task:</h2>
+				<div class="mt-2 flex items-center gap-3">
+					<h1 class="text-3xl font-bold text-[#4F3117]">
+						{$selectedTask.title}
+					</h1>
+				</div>
 			</div>
-		</div>
-		<p class="mb-2 text-lg font-bold tracking-widest text-[#4F3117] uppercase">
-			Quest Steps
-		</p>
-		<div class="flex flex-col space-y-4">
-			{#if $selectedTask.subtasks && $selectedTask.subtasks.length > 0}
-				{#each $selectedTask.subtasks as subtask}
-					<div
-						class="flex items-center gap-6 bg-size-[100%_100%] bg-no-repeat px-10 py-6"
-						style="background-image: url({subtaskScroll});"
-					>
-						<label class="relative flex cursor-pointer items-center">
-							<input
-								type="checkbox"
-								checked={subtask.completed}
-								onchange={() => toggleSubtask(subtask.id)}
-								class="peer hidden"
-							/>
-							<div
-								class="flex h-7 w-7 items-center justify-center rounded-full bg-[#4F3117] text-[#fdf3e7] transition-all peer-checked:bg-[#4F3117]/60"
-							>
-								{#if subtask.completed}
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4"
-										viewBox="0 0 20 20"
-										fill="currentColor"
-									>
-										<path
-											fill-rule="evenodd"
-											d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-											clip-rule="evenodd"
-										/>
-									</svg>
-								{/if}
-							</div>
-						</label>
+			<p class="mb-2 text-lg font-bold tracking-widest text-[#4F3117] uppercase">Quest Steps</p>
+			<div class="flex flex-col space-y-4">
+				{#if $selectedTask.subtasks && $selectedTask.subtasks.length > 0}
+					{#each $selectedTask.subtasks as subtask}
+						<div
+							class="flex items-center gap-6 bg-size-[100%_100%] bg-no-repeat px-10 py-6"
+							style="background-image: url({subtaskScroll});"
+						>
+							<label class="relative flex cursor-pointer items-center">
+								<input
+									type="checkbox"
+									checked={subtask.completed}
+									onchange={() => toggleSubtask(subtask.id)}
+									class="peer hidden"
+								/>
+								<div
+									class="flex h-7 w-7 items-center justify-center rounded-full bg-[#4F3117] text-[#fdf3e7] transition-all peer-checked:bg-[#4F3117]/60"
+								>
+									{#if subtask.completed}
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4"
+											viewBox="0 0 20 20"
+											fill="currentColor"
+										>
+											<path
+												fill-rule="evenodd"
+												d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+												clip-rule="evenodd"
+											/>
+										</svg>
+									{/if}
+								</div>
+							</label>
 
-						<span
-							class="flex-1 text-xl tracking-wider text-[#4F3117] select-none
-                    		{subtask.completed ? 'line-through decoration-1 opacity-40' : ''}">
-							{subtask.text}
-						</span>
-					</div>
-				{/each}
-			{:else}
-				<p class="text-lg text-[#4F3117] italic opacity-50">No subtasks recorded.</p>
-			{/if}
-		</div>
-	</section>
-</div>
+							<span
+								class="flex-1 text-xl tracking-wider text-[#4F3117] select-none
+                    		{subtask.completed ? 'line-through decoration-1 opacity-40' : ''}"
+							>
+								{subtask.text}
+							</span>
+						</div>
+					{/each}
+				{:else}
+					<p class="text-lg text-[#4F3117] italic opacity-50">No subtasks recorded.</p>
+				{/if}
+			</div>
+		</section>
+	</div>
 </div>
 
 {#if showWarningModal}
@@ -461,7 +461,14 @@
 {/if}
 
 {#if showBreakModal}
-    <BreakTimer 
-	bind:showModal={showBreakModal} 
-	onReset={resetTimer}/>
+	<BreakTimer bind:showModal={showBreakModal} onReset={resetTimer} />
 {/if}
+
+<EditSession
+	bind:showModal={showEditModal}
+	bind:minutes={minutes}
+	title="Edit Quest Length"
+	label="How many minutes shall the quest last?"
+	max={120}
+	onSave={editSession}
+/>

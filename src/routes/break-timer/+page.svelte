@@ -9,12 +9,16 @@
     import startTimer from '$lib/assets/work-timer/start-timer.png';
     import breakScroll from '$lib/assets/break-timer/break-scroll.png';
 
+    import EditSession from '$lib/components/EditSession.svelte';
+
+    let minutes = $state(5);
     let secondsLeft = $state(0);
     let initialSeconds = $state(0);
     let running = $state(false);
     let initialized = $state(false);
     let alarmEnabled = $state(true);
     let timer = null;
+    let showEditModal = $state(false);
 
     const display = $derived(
         `${Math.floor(secondsLeft / 60).toString().padStart(2, '0')}:${(secondsLeft % 60).toString().padStart(2, '0')}`
@@ -23,6 +27,7 @@
     $effect(() => {
         if (!initialized) {
             const m = Number($page.url.searchParams.get('minutes')) || 5;
+            minutes = m;
             initialSeconds = m * 60;
             secondsLeft = initialSeconds;
             initialized = true;
@@ -53,14 +58,15 @@
         secondsLeft = initialSeconds;
     }
 
-    function editSession() {
-        if (running) return;
-        const input = prompt('Edit rest length (minutes):', Math.floor(initialSeconds / 60));
-        const m = Number(input);
-        if (m >= 1) {
-            initialSeconds = m * 60;
+    	function openEditModal() {
+		if (running) return;
+		showEditModal = true;
+	}
+
+    function editSession(newMinutes) {
+            minutes = Number(newMinutes);
+            initialSeconds = minutes * 60;
             secondsLeft = initialSeconds;
-        }
     }
 
     function finishBreak() {
@@ -107,7 +113,7 @@
 
         <div class="-mt-4 flex flex-wrap justify-center gap-3 sm:-mt-6">
             <button
-                onclick={editSession}
+                onclick={openEditModal}
                 disabled={running}
                 class="flex h-[70px] w-[140px] cursor-pointer items-center justify-center font-['IM_Fell_Great_Primer_SC'] text-lg text-[#5a3e1b] transition-all hover:scale-105 hover:text-[#B69476] disabled:cursor-not-allowed disabled:opacity-50 sm:h-20 sm:w-40 sm:text-xl"
                 style={`background-image: url(${startTimer}); background-size: contain; background-position: center; background-repeat: no-repeat;`}
@@ -184,3 +190,12 @@
         color: #FFD700;
     }
 </style>
+
+<EditSession
+	bind:showModal={showEditModal}
+	bind:minutes={minutes}
+	title="Edit Break Length"
+	label="How many minutes shall the break last?"
+	max={60}
+	onSave={editSession}
+/>
