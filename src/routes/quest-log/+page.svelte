@@ -9,9 +9,9 @@
 
 	let showModal = false;
 	let showDetailModal = false;
-    
-    // --- PREMADE MODAL TOGGLE ---
-    let showPremadeModal = false; 
+
+	// --- PREMADE MODAL TOGGLE ---
+	let showPremadeModal = false;
 
 	let selectedTask = null;
 	let sortByPriority = 'none'; // 'none' | 'asc' | 'desc'
@@ -25,35 +25,35 @@
 	let email = '';
 	let error = '';
 
-    // --- PREMADE QUEST DATA ---
-    const premadeTemplates = {
-        "Study": ["Read 1 Chapter", "Complete Assignment", "Flashcard Session"],
-        "Work": ["Clear Inbox", "Team Meeting", "Write Report"],
-        "Chores": ["Wash Dishes", "Vacuum Room", "Take out Trash"],
-        "Wellness": ["30 Min Walk", "Drink 2L Water", "Meditation"],
-        "Reading": ["Read 15 Pages", "Audiobook Session"],
-        "Hobbies": ["Practice Skill", "Creative Time"],
-        "Social": ["Call a Friend", "Family Dinner"],
-        "Events": ["Birthday Party", "Doctor Appointment"]
-    };
+	// --- PREMADE QUEST DATA ---
+	const premadeTemplates = {
+		Study: ['Read 1 Chapter', 'Complete Assignment', 'Flashcard Session'],
+		Work: ['Clear Inbox', 'Team Meeting', 'Write Report'],
+		Chores: ['Wash Dishes', 'Vacuum Room', 'Take out Trash'],
+		Wellness: ['30 Min Walk', 'Drink 2L Water', 'Meditation'],
+		Reading: ['Read 15 Pages', 'Audiobook Session'],
+		Hobbies: ['Practice Skill', 'Creative Time'],
+		Social: ['Call a Friend', 'Family Dinner'],
+		Events: ['Birthday Party', 'Doctor Appointment']
+	};
 
-    // --- QUICK ADD FUNCTION ---
-    function selectPremade(title, category) {
-        // Fill the form automatically
-        form.title = title;
-        form.category = category;
-        form.priority = 'Medium'; 
-        
-        // Set date to TODAY
-        const today = new Date();
-        form.endDate = today.toISOString().split('T')[0];
+	// --- QUICK ADD FUNCTION ---
+	function selectPremade(title, category) {
+		// Fill the form automatically
+		form.title = title;
+		form.category = category;
+		form.priority = 'Medium';
 
-        // Reuse existing submit function
-        submitTask();
-        
-        // Close modal
-        showPremadeModal = false;
-    }
+		// Set date to TODAY
+		const today = new Date();
+		form.endDate = today.toISOString().split('T')[0];
+
+		// Reuse existing submit function
+		submitTask();
+
+		// Close modal
+		showPremadeModal = false;
+	}
 
 	onMount(async () => {
 		const storedUser = localStorage.getItem('user');
@@ -346,23 +346,23 @@
 		/>
 	</div>
 
-    <!-- BUTTON GROUP (Custom vs Premade) -->
+	<!-- BUTTON GROUP (Custom vs Premade) -->
 	<div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-		<div class="flex gap-2 w-full sm:w-auto">
-            <button
-                on:click={addTask}
-                class="flex-1 rounded-xl bg-[#F5E8D9] px-3 py-2 text-lg font-semibold text-[#4F3117] shadow-md hover:opacity-70 sm:px-4 sm:py-2"
-            >
-                + Custom
-            </button>
+		<div class="flex w-full gap-2 sm:w-auto">
+			<button
+				on:click={addTask}
+				class="flex-1 rounded-lg bg-[#F5E8D9] px-2.5 py-1.5 font-['Inter',sans-serif] text-base font-semibold text-[#4F3117] shadow-md hover:opacity-70 sm:px-3 sm:py-1.5"
+			>
+				+ Custom
+			</button>
 
-            <button
-               on:click={() => showPremadeModal = true}
-               class="flex-1 rounded-xl bg-[#F5E8D9] px-3 py-2 text-lg font-semibold text-[#4F3117] shadow-md hover:opacity-70 sm:px-4 sm:py-2"
-            >
-               Premade Quests
-          </button>
-        </div>
+			<button
+				on:click={() => (showPremadeModal = true)}
+				class="flex-1 rounded-lg bg-[#F5E8D9] px-2.5 py-1.5 font-['Inter',sans-serif] text-base font-semibold text-[#4F3117] shadow-md hover:opacity-70 sm:px-3 sm:py-1.5"
+			>
+				Premade Quests
+			</button>
+		</div>
 
 		<div class="flex flex-wrap items-center gap-2 font-['Inter',sans-serif] font-semibold sm:gap-3">
 			<!-- Category -->
@@ -397,7 +397,7 @@
 			>
 		</div>
 	</div>
-    
+
 	<!-- desktop -->
 	<div class="hidden overflow-x-auto sm:block">
 		<table class="w-full border-separate border-spacing-y-2 sm:border-spacing-y-4">
@@ -495,8 +495,23 @@
 							Complete</button
 						>
 					{:else}
-						<span class="text-sm text-green-600">✓ Done</span>
+						<span class="text-sm px-3 py-2 text-green-600">✓ Done</span>
 					{/if}
+					<button
+						on:click={() => deleteTask(task.id)}
+						class="flex items-center justify-center rounded bg-red-600 p-2 text-white hover:bg-red-700"
+						aria-label="Delete task"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 448 512"
+							class="h-5 w-5 fill-white"
+						>
+							<path
+								d="M136.7 5.9C141.1-7.2 153.3-16 167.1-16l113.9 0c13.8 0 26 8.8 30.4 21.9L320 32 416 32c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 8.7-26.1zM32 144l384 0 0 304c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-304zm88 64c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24zm104 0c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24zm104 0c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24z"
+							/>
+						</svg>
+					</button>
 				</div>
 			</div>
 		{/each}
@@ -549,7 +564,7 @@
 					</select>
 				</div>
 				<div>
-                    <!-- UPDATED CATEGORIES FOR DROPDOWN -->
+					<!-- UPDATED CATEGORIES FOR DROPDOWN -->
 					<label class="mb-1 block text-sm" for="category">Category</label>
 					<select
 						id="category"
@@ -586,35 +601,40 @@
 
 <!-- PREMADE TASKS MODAL -->
 {#if showPremadeModal}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-		<div class="relative w-full max-w-5xl max-h-[85vh] overflow-y-auto rounded-xl border-6 border-double border-[#ad8a6c] bg-[#fdf3e7] p-6 sm:p-8 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
-			
-            <div class="flex justify-between items-center mb-6 border-b-2 border-[#ad8a6c] pb-2">
-                <h2 class="font-['IM_Fell_Great_Primer_SC'] text-2xl sm:text-3xl text-[#4F3117]">Quick Select Quest</h2>
-                <button on:click={() => showPremadeModal = false} class="text-2xl text-[#4F3117] hover:text-red-600 transition-colors">✖</button>
-            </div>
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+		<div
+			class="relative max-h-[85vh] w-full max-w-5xl overflow-y-auto rounded-xl border-6 border-double border-[#ad8a6c] bg-[#fdf3e7] p-6 shadow-[0_0_20px_rgba(0,0,0,0.5)] sm:p-8"
+		>
+			<div class="mb-6 flex items-center justify-between border-b-2 border-[#ad8a6c] pb-2">
+				<h2 class="font-['IM_Fell_Great_Primer_SC'] text-2xl text-[#4F3117] sm:text-3xl">
+					Quick Select Quest
+				</h2>
+				<button
+					on:click={() => (showPremadeModal = false)}
+					class="bg-transparent border-none font-bold text-xl text-[#4F3117] cursor-pointer transition-transform duration-200 hover:rotate-12">
+					✕
+				</button>
+			</div>
 
-            <!-- GRID LAYOUT -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {#each Object.entries(premadeTemplates) as [category, list]}
-                    <div class="flex flex-col gap-2">
-                        <!-- Category Header -->
-                        <h3 class="font-['IM_Fell_Great_Primer_SC'] text-xl text-[#4F3117] border-b border-[#4F3117]/20 pb-1 mb-1">
-                            {category}
-                        </h3>
-                        <!-- Task Buttons -->
-                        {#each list as taskTitle}
-                            <button 
-                                on:click={() => selectPremade(taskTitle, category)}
-                                class="text-left px-3 py-2 rounded-lg border-2 border-[#ad8a6c] bg-[#fff8e1] text-[#4F3117] hover:bg-[#4F3117] hover:text-[#fff8e1] transition-colors shadow-sm text-sm font-sans"
-                            >
-                                {taskTitle}
-                            </button>
-                        {/each}
-                    </div>
-                {/each}
-            </div>
-
+			<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+				{#each Object.entries(premadeTemplates) as [category, list]}
+					<div class="flex flex-col gap-2">
+						<h3
+							class="mb-1 border-b border-[#4F3117]/20 pb-1 font-['IM_Fell_Great_Primer_SC'] text-xl text-[#4F3117]"
+						>
+							{category}
+						</h3>
+						{#each list as taskTitle}
+							<button
+								on:click={() => selectPremade(taskTitle, category)}
+								class="rounded-lg border-2 border-[#ad8a6c] bg-[#fff8e1] px-3 py-2 text-left font-['Inter',sans-serif] text-sm text-[#4F3117] shadow-sm transition-colors hover:bg-[#4F3117] hover:text-[#fff8e1]"
+							>
+								{taskTitle}
+							</button>
+						{/each}
+					</div>
+				{/each}
+			</div>
 		</div>
 	</div>
 {/if}
