@@ -203,7 +203,7 @@
 			message += `You earned 🪙 ${earned} coins.`
             
             if (coinData.success) {
-                message += `Your new balance: ${coinData.newTotal}\n`;
+                message += ` Your new balance: ${coinData.newTotal}\n`;
             }
 
             if (taskData.unlockedAchievements && taskData.unlockedAchievements.length > 0) {
