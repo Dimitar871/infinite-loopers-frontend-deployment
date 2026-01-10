@@ -8,6 +8,7 @@ export const load = async ({ cookies, fetch }) => {
         const decorationsResponse = await fetch(`${PUBLIC_API_URL}/shop/decorations`);
         const ownedDecorationsResponse = await fetch(`${PUBLIC_API_URL}/users/${userId}/decorations`);
         const ownedCharactersResponse = await fetch(`${PUBLIC_API_URL}/users/${userId}/characters`);
+        const currentCharacterResponse = await fetch(`${PUBLIC_API_URL}/users/${userId}/characters/current`);
         const userResponse = await fetch(`${PUBLIC_API_URL}/users/${userId}`);
 
         if (!charactersResponse.ok) {
@@ -30,10 +31,15 @@ export const load = async ({ cookies, fetch }) => {
             throw new Error(`Failed to fetch all characters of user ${userId}: ${ownedDecorationsResponse.statusText}`);
         }
 
+        if (!currentCharacterResponse.ok) {
+            throw new Error(`Failed to fetch current character of user ${userId}: ${ownedDecorationsResponse.statusText}`);
+        }
+
         const characterJson = await charactersResponse.json();
         const decorationJson = await decorationsResponse.json();
         const ownedDecorationsJson = await ownedDecorationsResponse.json();
         const ownedCharactersJson = await ownedCharactersResponse.json();
+        const currentCharacterJson = await currentCharacterResponse.json();
         const userJson = await userResponse.json();
 
         // All characters except the first one - it is the default character
@@ -42,12 +48,14 @@ export const load = async ({ cookies, fetch }) => {
         const allDecorations = decorationJson.data;
         const ownedDecorationsData = ownedDecorationsJson.data;
         const ownedCharactersData = ownedCharactersJson.data;
+        const currentCharacterData = currentCharacterJson.data;
+        const currentCharacter = currentCharacterData.data;
 
         const ownedDecorationsArray = ownedDecorationsData.map((res) => res.data);
         const ownedCharactersArray = ownedCharactersData.map((res) => res.data);
         return { characters: allCharacters, user: userInformation, 
             decorations: allDecorations, ownedDecorations: ownedDecorationsArray,
-            ownedCharacters: ownedCharactersArray
+            ownedCharacters: ownedCharactersArray, character: currentCharacter
          };
     } catch (error) {
         console.error('Error loading characters:', error);
