@@ -16,7 +16,6 @@
     let initialSeconds = $state(0);
     let running = $state(false);
     let initialized = $state(false);
-    let alarmEnabled = $state(true);
     let timer = null;
     let showEditModal = $state(false);
 
@@ -71,10 +70,6 @@
 
     function finishBreak() {
         pause();
-        if (alarmEnabled) {
-            const audio = new Audio('/sounds/alarm.mp3'); // Ensure path is correct
-            audio.play().catch(() => console.log("Audio play blocked"));
-        }
         goto('/home'); 
     }
 
@@ -128,30 +123,6 @@
             >
                 Reset Timer
             </button>
-
-            <button
-			onclick={() => (alarmEnabled = !alarmEnabled)}
-			class="
-				flex h-[70px] w-[140px]
-				cursor-pointer items-center
-				justify-center
-
-				font-['IM_Fell_Great_Primer_SC']
-				text-lg tracking-wide
-				text-[#5a3e1b]
-
-				transition-all duration-150
-				hover:scale-105 hover:text-[#B69476]
-
-				sm:h-20 sm:w-40 sm:text-xl
-			"
-			style={`background-image: url(${startTimer});
-			        background-size: contain;
-			        background-position: center;
-			        background-repeat: no-repeat;`}
-		>
-			Alarm: {alarmEnabled ? 'On' : 'Off'}
-		</button>
         </div>
         
         <button
