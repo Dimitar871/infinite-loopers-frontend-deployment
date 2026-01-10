@@ -13,6 +13,7 @@
 	import startTimer from '$lib/assets/work-timer/start-timer.png';
 	import questScroll from '$lib/assets/work-timer/quest-scroll.png';
 	import subtaskScroll from '$lib/assets/work-timer/subtask-scroll.png';
+	import alarmAudio from '$lib/assets/alarm.mp3';
 
 	let minutes = 25;
 	let initialSeconds = 0;
@@ -23,6 +24,7 @@
 	let alarmEnabled = true;
 	let showBreakModal = false;
 	let showEditModal = false;
+	let alarm = new Audio(alarmAudio);
 
 	let shouldWarn = true;
 	let showWarningModal = false;
@@ -130,6 +132,8 @@
 		if (running) return;
 
 		running = true;
+		alarm.loop = true;
+
 		timer = setInterval(() => {
 			if (secondsLeft <= 0) {
 				finish();
@@ -178,9 +182,11 @@
 		secondsLeft = 0;
 		shouldWarn = false;
 
-		if (alarmEnabled) {
-			const audio = new Audio(''); // will put an actual alarm later
-			audio.play();
+		if (alarmEnabled && alarm) {
+			alarm.currentTime = 0;
+			alarm.play().catch((err) => {
+				console.warn('Audio blocked:', err);
+			});
 		}
 
 		const earnedCoins = calculateCoins(initialSeconds);
@@ -222,6 +228,7 @@
 
 			const unsubscribe = isOpen.subscribe((open) => {
 				if (!open) {
+					alarm.pause();
 					showBreakModal = true;
 					unsubscribe();
 				}
