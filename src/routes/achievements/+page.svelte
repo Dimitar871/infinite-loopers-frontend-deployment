@@ -147,7 +147,7 @@
 								>
 									<span
 										class="font-['IM_Fell_Great_Primer_SC'] text-xl font-bold text-[#4F3117] sm:text-2xl"
-										>+ {ach.points} pts</span
+										>+ {ach.points} xp</span
 									>
 									<img src={medal} alt="Medal" class="h-16 w-16 sm:h-20 sm:w-20" />
 								</div>
@@ -188,7 +188,7 @@
 								>
 									<span
 										class="font-['IM_Fell_Great_Primer_SC'] text-xl font-bold text-[#4F3117] sm:text-2xl"
-										>+ {ach.points} pts</span
+										>+ {ach.points} xp</span
 									>
 									<img src={medal} alt="Medal" class="h-16 w-16 sm:h-20 sm:w-20" />
 								</div>

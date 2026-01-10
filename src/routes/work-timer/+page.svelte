@@ -92,6 +92,12 @@
 		return baseCoins + coinsPerMinute * Math.floor(seconds / 60);
 	}
 
+	function calculateXP(seconds) {
+		const baseXP = 10;
+		const xpPerMinute = 5;
+		return baseXP + xpPerMinute * Math.floor(seconds / 60);
+	}
+
 	function toggleSubtask(subtaskId) {
 		if (!$selectedTask || !$selectedTask.subtasks) return;
 		$selectedTask.subtasks = $selectedTask.subtasks.map((st) =>
@@ -177,54 +183,54 @@
 			audio.play();
 		}
 
-		const earned = calculateCoins(initialSeconds); 
-        const userId = localStorage.getItem('userId');
+		const earnedCoins = calculateCoins(initialSeconds);
+		const earnedXP = calculateXP(initialSeconds);
+		const userId = localStorage.getItem('userId');
 
 		if (!userId) {
-    		console.error("User does not exist.");
-    		return;
+			console.error('User does not exist.');
+			return;
 		}
 
 		try {
-            const coinRes = await fetch(`http://localhost:3012/users/${userId}/add-coins`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount: earned })
-            });
-            const coinData = await coinRes.json();
+			const rewardsRes = await fetch(`http://localhost:3012/users/${userId}/add-rewards`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ coins: earnedCoins, xp: earnedXP })
+			});
+			const rewardsData = await rewardsRes.json();
 
-            const taskRes = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}/complete`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const taskData = await taskRes.json();
+			const taskRes = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}/complete`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' }
+			});
+			const taskData = await taskRes.json();
 
-            let message = `Quest Complete!\n`;
-			message += `You earned 🪙 ${earned} coins.`
-            
-            if (coinData.success) {
-                message += ` Your new balance: ${coinData.newTotal}\n`;
-            }
+			let message = `Quest Complete!\n`;
+			message += `You earned 🪙 ${earnedCoins} coins and ⭐ ${earnedXP} XP.`;
 
-            if (taskData.unlockedAchievements && taskData.unlockedAchievements.length > 0) {
-                const names = taskData.unlockedAchievements.map(a => a.name).join(', ');
-                message += `\n🏆 Achievements Unlocked: ${names}!`;
-            }
+			if (rewardsData.success) {
+				message += `\nYour new balance: ${rewardsData.newCoins}\n`;
+			}
 
-            openModal(message, 'success');
+			if (taskData.unlockedAchievements && taskData.unlockedAchievements.length > 0) {
+				const names = taskData.unlockedAchievements.map((a) => a.name).join(', ');
+				message += `\n🏆 Achievements Unlocked: ${names}!`;
+			}
 
-            const unsubscribe = isOpen.subscribe((open) => {
-                if (!open) {
-                    showBreakModal = true;
-                    unsubscribe();
-                }
-            });
+			openModal(message, 'success');
 
-        } catch (err) {
-            console.error("Failed to finish quest:", err);
-            showBreakModal = true;
-        }
-    }
+			const unsubscribe = isOpen.subscribe((open) => {
+				if (!open) {
+					showBreakModal = true;
+					unsubscribe();
+				}
+			});
+		} catch (err) {
+			console.error('Failed to finish quest:', err);
+			showBreakModal = true;
+		}
+	}
 
 	onDestroy(() => clearInterval(timer));
 	onMount(() => start());
@@ -484,7 +490,7 @@
 
 <EditSession
 	bind:showModal={showEditModal}
-	bind:minutes={minutes}
+	bind:minutes
 	title="Edit Quest Length"
 	label="How many minutes shall the quest last?"
 	max={120}
