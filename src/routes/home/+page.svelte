@@ -15,6 +15,49 @@
 
 	let { data } = $props();
 
+    function calcTotalFocusTime(tasks) {
+      const totalSeconds = tasks.reduce((total, task) => total + (task.timeSpent || 0), 0);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      const hh = hours.toString().padStart(2, '0');
+      const mm = minutes.toString().padStart(2, '0');
+      const ss = seconds.toString().padStart(2, '0');
+      return `${hh}:${mm}:${ss}`;
+  }
+
+  function calcStreak(tasks) {
+    const completedDates = [...new Set(tasks
+        .filter(t => t.completedAt)
+        .map(t => new Date(t.completedAt).toISOString().split('T')[0])
+    )].sort((a, b) => new Date(b) - new Date(a)); 
+
+    if (completedDates.length === 0) return 0;
+
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+    if (completedDates[0] !== today && completedDates[0] !== yesterday) {
+        return 0;
+    }
+
+    let streak = 0;
+    let currentDate = new Date(completedDates[0]);
+
+    for (let i = 0; i < completedDates.length; i++) {
+        const dateStr = completedDates[i];
+        const expectedDate = new Date(currentDate);
+        expectedDate.setDate(currentDate.getDate() - i);
+        
+        if (dateStr === expectedDate.toISOString().split('T')[0]) {
+            streak++;
+        } else {
+            break; 
+        }
+    }
+    return streak;
+}
+
 	let tourStep = $state(0);
 
 	$effect(() => {
@@ -191,29 +234,21 @@
 				Focused for:
 			</p>
 			<img src={hourglassIcon} alt="hourglass" class="my-4 h-20 w-auto sm:h-30" />
-			<p class="font-['IM_Fell_Great_Primer_SC'] text-3xl text-[#5A3E1B]">00:00:00</p>
+			<p class="font-['IM_Fell_Great_Primer_SC'] text-3xl text-[#5A3E1B]">{calcTotalFocusTime(data.tasks)}</p>
 		</div>
 
-		<div
-			class="flex w-full max-w-[300px] flex-col items-center rounded-lg border-4 border-[#4f311747] bg-[#E3D3BF] p-6 sm:p-8"
-		>
-			<p class="font-['IM_Fell_Great_Primer_SC'] text-xl text-[#5A3E1B] sm:text-2xl">
-				Quests completed:
-			</p>
-			<img src={scrollIcon} alt="scroll" class="my-4 h-20 w-auto sm:h-30" />
-			<p class="font-['IM_Fell_Great_Primer_SC'] text-3xl text-[#5A3E1B]">10</p>
-		</div>
+    <div class="flex flex-col items-center rounded-lg p-6 sm:p-8 bg-[#E3D3BF] border-4 border-[#4f311747] w-full max-w-[300px]">
+      <p class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-xl sm:text-2xl">Quests completed:</p>
+      <img src={scrollIcon} alt='scroll' class="w-auto h-20 sm:h-30 my-4"/>
+      <p class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-3xl">{data.tasks?.filter(task => task.completedAt).length || 0}</p>
+    </div>
 
-		<div
-			class="flex w-full max-w-[300px] flex-col items-center rounded-lg border-4 border-[#4f311747] bg-[#E3D3BF] p-6 sm:p-8"
-		>
-			<p class="font-['IM_Fell_Great_Primer_SC'] text-xl text-[#5A3E1B] sm:text-2xl">
-				Current streak:
-			</p>
-			<img src={streakIcon} alt="streak" class="my-4 h-20 w-auto sm:h-30" />
-			<p class="font-['IM_Fell_Great_Primer_SC'] text-3xl text-[#5A3E1B]">8</p>
-		</div>
-	</div>
+    <div class="flex flex-col items-center rounded-lg p-6 sm:p-8 bg-[#E3D3BF] border-4 border-[#4f311747] w-full max-w-[300px]">
+      <p class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-xl sm:text-2xl">Current streak:</p>
+      <img src={streakIcon} alt='streak' class="w-auto h-20 sm:h-30 my-4"/>
+      <p class="font-['IM_Fell_Great_Primer_SC'] text-[#5A3E1B] text-3xl">{calcStreak(data.tasks)}</p>
+    </div>
+  </div>
 
 	<a
 		href="/quest-log"
