@@ -28,11 +28,11 @@ export const load = async ({ cookies, fetch }) => {
         }
 
         if (!ownedCharactersResponse.ok) {
-            throw new Error(`Failed to fetch all characters of user ${userId}: ${ownedDecorationsResponse.statusText}`);
+            throw new Error(`Failed to fetch all characters of user ${userId}: ${ownedCharactersResponse.statusText}`);
         }
 
         if (!currentCharacterResponse.ok) {
-            throw new Error(`Failed to fetch current character of user ${userId}: ${ownedDecorationsResponse.statusText}`);
+            throw new Error(`Failed to fetch current character of user ${userId}: ${currentCharacterResponse.statusText}`);
         }
 
         const characterJson = await charactersResponse.json();

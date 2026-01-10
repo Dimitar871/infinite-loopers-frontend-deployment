@@ -94,7 +94,7 @@
         </button>
     </div>
 
-    <div class="ml-auto flex items-center bg-[#fbf5ec] border-2 border-[#4f311747] px-4 py-2 rounded-lg shadow-sm">
+    <div class="flex items-center bg-[#fbf5ec] border-2 border-[#4f311747] px-4 py-2 rounded-lg shadow-sm">
         <span class="text-[#4F3117] text-xl">
             Wallet: <span class="font-bold text-2xl">{coins}</span> Coins
         </span>
