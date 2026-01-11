@@ -59,31 +59,40 @@
 	}
 
 	onMount(async () => {
-		const storedUser = localStorage.getItem('user');
-		if (!storedUser) {
-			error = 'No user found, please login first.';
-			return;
-		}
+	const storedUser = localStorage.getItem('user');
+	if (!storedUser) {
+		error = 'No user found, please login first.';
+		return;
+	}
 
-		const user = JSON.parse(storedUser);
-		email = user.email;
-		userId = user.id;
+	const user = JSON.parse(storedUser);
+	email = user.email;
+	userId = user.id;
 
-		const tempForm = sessionStorage.getItem('tempForm');
-		const selectedDate = sessionStorage.getItem('selectedDate');
-		const isSelectingDate = sessionStorage.getItem('isSelectingDate') === 'true';
+	const tempForm = sessionStorage.getItem('tempForm');
+	const selectedDate = sessionStorage.getItem('selectedDate');
+	const isSelectingDate = sessionStorage.getItem('isSelectingDate') === 'true';
 
+	if (isSelectingDate) {
+		modalMode = tempForm ? 'edit' : 'create';
+		
 		if (tempForm) {
 			form = JSON.parse(tempForm);
-			if (isSelectingDate && selectedDate) form.endDate = selectedDate;
-			showModal = isSelectingDate;
-			sessionStorage.removeItem('tempForm');
-			sessionStorage.removeItem('isSelectingDate');
-			sessionStorage.removeItem('selectedDate');
+			const parsedForm = JSON.parse(tempForm);
+			if (parsedForm.taskId) {
+				editingTaskId = parsedForm.taskId;
+			}
 		}
+		
+		if (selectedDate) {
+			form.endDate = selectedDate;
+		}
+		
+		showModal = true;
+	}
 
-		await loadTasks();
-	});
+	await loadTasks();
+});
 
 	async function loadTasks() {
 		if (!userId) return;
@@ -130,9 +139,26 @@
 	}
 
 	function openCalendar() {
-		sessionStorage.setItem('tempForm', JSON.stringify(form));
-		sessionStorage.setItem('isSelectingDate', 'true');
-		goto('/calendar');
+	const tempFormData = {
+		...form,
+		taskId: editingTaskId
+	};
+	sessionStorage.setItem('tempForm', JSON.stringify(tempFormData));
+	sessionStorage.setItem('isSelectingDate', 'true');
+	goto('/calendar');
+}
+
+	function openDetailModal(taskId) {
+		const task = tasks.find((t) => t.id === taskId);
+		if (!task) return;
+
+		selectedTask = {
+			...task,
+			notes: task.notes || '',
+			suggestions: task.suggestions || '',
+			subtasks: [...(task.subtasks || [])]
+		};
+		showDetailModal = true;
 	}
 
 	function sortTasks() {
@@ -174,37 +200,20 @@
 		sortTasks();
 
 	async function submitTask() {
-		formError = '';
-		if (!form.title.trim()) {
-			formError = 'Task name is required';
-			return;
-		}
-		if (!userId) return;
+	formError = '';
+	if (!form.title.trim()) {
+		formError = 'Task name is required';
+		return;
+	}
+	if (!userId) return;
 
-		try {
-			// EDIT MODE
-			if (modalMode === 'edit' && editingTaskId) {
-				const res = await fetch(`http://localhost:3010/tasks/${editingTaskId}`, {
-					method: 'PUT',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(form)
-				});
-
-				const data = await res.json();
-				if (data.success) {
-					await loadTasks();
-					closeTaskModal();
-				} else {
-					openModal(data.message || 'Failed to update task', 'error');
-				}
-				return;
-			}
-
-			// CREATE MODE
-			const res = await fetch(`http://localhost:3011/tasks/${userId}`, {
-				method: 'POST',
+	try {
+		// EDIT MODE
+		if (modalMode === 'edit' && editingTaskId) {
+			const res = await fetch(`http://localhost:3011/tasks/${editingTaskId}`, {
+				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ ...form, userId })
+				body: JSON.stringify(form)
 			});
 
 			const data = await res.json();
@@ -212,24 +221,45 @@
 				await loadTasks();
 				closeTaskModal();
 			} else {
-				openModal(data.message || 'Failed to add task', 'error');
+				openModal(data.message || 'Failed to update task', 'error');
 			}
-		} catch (err) {
-			console.error(err);
+			return;
 		}
+
+		// CREATE MODE
+		const res = await fetch(`http://localhost:3011/tasks/${userId}`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ ...form, userId })
+		});
+
+		const data = await res.json();
+		if (data.success) {
+			await loadTasks();
+			closeTaskModal();
+		} else {
+			openModal(data.message || 'Failed to add task', 'error');
+		}
+	} catch (err) {
+		console.error(err);
 	}
+}
 
 	function closeTaskModal() {
-		showModal = false;
-		modalMode = 'create';
-		editingTaskId = null;
-		formError = '';
-		form = { title: '', endDate: '', category: '', priority: 'Medium' };
-	}
+	showModal = false;
+	modalMode = 'create';
+	editingTaskId = null;
+	formError = '';
+	form = { title: '', endDate: '', category: '', priority: 'Medium' };
+	
+	sessionStorage.removeItem('tempForm');
+	sessionStorage.removeItem('isSelectingDate');
+	sessionStorage.removeItem('selectedDate');
+}
 
 	async function completeTask(taskId) {
 		try {
-			const res = await fetch(`http://localhost:3010/tasks/${taskId}/complete`, {
+			const res = await fetch(`http://localhost:3011/tasks/${taskId}/complete`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' }
 			});
@@ -287,19 +317,31 @@
 	}
 
 	function openEditModal(task) {
-		modalMode = 'edit';
-		editingTaskId = task.id;
+	modalMode = 'edit';
+	editingTaskId = task.id;
 
-		form = {
-			title: task.title,
-			endDate: task.end,
-			category: task.category,
-			priority: task.priority || 'Medium'
-		};
+	form = {
+		title: task.title,
+		endDate: task.end,
+		category: task.category,
+		priority: task.priority || 'Medium'
+	};
 
-		showModal = true;
-		openMenuTaskId = null;
-	}
+	showModal = true;
+	openMenuTaskId = null;
+}
+
+	function handleCancel() {
+	showModal = false;
+	modalMode = 'create';
+	editingTaskId = null;
+	formError = '';
+	form = { title: '', endDate: '', category: '', priority: 'Medium' };
+	
+	sessionStorage.removeItem('tempForm');
+	sessionStorage.removeItem('isSelectingDate');
+	sessionStorage.removeItem('selectedDate');
+}
 
 	function calculateStatusFromSubtasks(subtasks) {
 		if (!subtasks || subtasks.length === 0) {
@@ -720,11 +762,11 @@
 					</button>
 
 					<button
-						class="flex-1 rounded-lg border-2 border-[#ad8a6c] bg-[#e0d3c2] py-2 text-lg hover:bg-[#d2c1aa] sm:text-base"
-						on:click={() => (showModal = false)}
-					>
-						Cancel
-					</button>
+	class="flex-1 rounded-lg border-2 border-[#ad8a6c] bg-[#e0d3c2] py-2 text-lg hover:bg-[#d2c1aa] sm:text-base"
+	on:click={handleCancel}
+>
+	Cancel
+</button>
 				</div>
 			</div>
 		</div>
