@@ -392,7 +392,7 @@
 			style="background-image: url({questScroll});"
 		>
 			<div class="mb-6">
-				<h2 class="text-3xl tracking-tight text-[#4F3117] opacity-90">Current task:</h2>
+				<h2 class="text-3xl tracking-tight text-[#4F3117] opacity-90">Current Quest:</h2>
 				<div class="mt-2 flex items-center gap-3">
 					<h1 class="text-3xl font-bold text-[#4F3117]">
 						{$selectedTask.title}
