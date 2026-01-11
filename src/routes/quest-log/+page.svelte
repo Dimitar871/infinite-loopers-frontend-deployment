@@ -9,6 +9,9 @@
 
 	let showModal = false;
 	let showDetailModal = false;
+	let modalMode = 'create'; // 'create' | 'edit'
+	let editingTaskId = null;
+	let openMenuTaskId = null;
 
 	// --- PREMADE MODAL TOGGLE ---
 	let showPremadeModal = false;
@@ -93,7 +96,7 @@
 					// Calculate status from subtasks if subtasks exist
 					const calculatedStatus = calculateStatusFromSubtasks(subtasks);
 					const status = calculatedStatus || task.status;
-					
+
 					return {
 						id: task.id,
 						title: task.title,
@@ -120,6 +123,9 @@
 	}
 
 	function addTask() {
+		modalMode = 'create';
+		editingTaskId = null;
+		form = { title: '', endDate: '', category: '', priority: 'Medium' };
 		showModal = true;
 	}
 
@@ -176,37 +182,49 @@
 		if (!userId) return;
 
 		try {
+			// EDIT MODE
+			if (modalMode === 'edit' && editingTaskId) {
+				const res = await fetch(`http://localhost:3010/tasks/${editingTaskId}`, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(form)
+				});
+
+				const data = await res.json();
+				if (data.success) {
+					await loadTasks();
+					closeTaskModal();
+				} else {
+					openModal(data.message || 'Failed to update task', 'error');
+				}
+				return;
+			}
+
+			// CREATE MODE
 			const res = await fetch(`http://localhost:3011/tasks/${userId}`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ ...form, userId })
 			});
+
 			const data = await res.json();
 			if (data.success) {
-				const newT = {
-					id: data.task.id,
-					title: data.task.title,
-					end: data.task.endDate ? new Date(data.task.endDate).toISOString().split('T')[0] : '',
-					status: data.task.status,
-					category: data.task.category,
-					priority: data.task.priority,
-					originalIndex: tasks.length,
-					createdAt: data.task.createdAt || data.task.created_at || new Date().getTime(),
-					notes: data.task.notes || '',
-					suggestions: data.task.suggestions || '',
-					subtasks: data.task.subtasks || []
-				};
-				tasks = [...tasks, newT];
-				originalTasksOrder = [...tasks];
-				sortTasks();
-				showModal = false;
-				form = { title: '', endDate: '', category: '', priority: 'Medium' };
+				await loadTasks();
+				closeTaskModal();
 			} else {
 				openModal(data.message || 'Failed to add task', 'error');
 			}
 		} catch (err) {
 			console.error(err);
 		}
+	}
+
+	function closeTaskModal() {
+		showModal = false;
+		modalMode = 'create';
+		editingTaskId = null;
+		formError = '';
+		form = { title: '', endDate: '', category: '', priority: 'Medium' };
 	}
 
 	async function completeTask(taskId) {
@@ -233,19 +251,6 @@
 		}
 	}
 
-	function openDetailModal(taskId) {
-		const task = tasks.find((t) => t.id === taskId);
-		if (!task) return;
-
-		selectedTask = {
-			...task,
-			notes: task.notes || '',
-			suggestions: task.suggestions || '',
-			subtasks: [...(task.subtasks || [])]
-		};
-		showDetailModal = true;
-	}
-
 	function closeDetailModal() {
 		showDetailModal = false;
 		selectedTask = null;
@@ -256,13 +261,13 @@
 			...(selectedTask.subtasks || []),
 			{ id: Date.now(), text: '', completed: false }
 		];
-		
+
 		// Recalculate status after adding subtask
 		const newStatus = calculateStatusFromSubtasks(selectedTask.subtasks);
 		if (newStatus) {
 			selectedTask.status = newStatus;
 		}
-		
+
 		selectedTask = { ...selectedTask };
 	}
 
@@ -271,14 +276,29 @@
 		selectedTask.subtasks = selectedTask.subtasks.filter(
 			(/** @type {{ id: any; }} */ st) => st.id !== subtaskId
 		);
-		
+
 		// Recalculate status after removing subtask
 		const newStatus = calculateStatusFromSubtasks(selectedTask.subtasks);
 		if (newStatus) {
 			selectedTask.status = newStatus;
 		}
-		
+
 		selectedTask = { ...selectedTask };
+	}
+
+	function openEditModal(task) {
+		modalMode = 'edit';
+		editingTaskId = task.id;
+
+		form = {
+			title: task.title,
+			endDate: task.end,
+			category: task.category,
+			priority: task.priority || 'Medium'
+		};
+
+		showModal = true;
+		openMenuTaskId = null;
 	}
 
 	function calculateStatusFromSubtasks(subtasks) {
@@ -301,19 +321,17 @@
 			(/** @type {{ id: any; completed: any; }} */ st) =>
 				st.id === subtaskId ? { ...st, completed: !st.completed } : st
 		);
-		
+
 		// Update status based on subtasks
 		const newStatus = calculateStatusFromSubtasks(selectedTask.subtasks);
 		if (newStatus) {
 			selectedTask.status = newStatus;
 		}
-		
+
 		selectedTask = { ...selectedTask };
-		
+
 		// Update the main tasks array immediately
-		const taskIndex = tasks.findIndex(
-			(/** @type {{ id: any; }} */ t) => t.id === selectedTask.id
-		);
+		const taskIndex = tasks.findIndex((/** @type {{ id: any; }} */ t) => t.id === selectedTask.id);
 		if (taskIndex !== -1) {
 			tasks[taskIndex] = {
 				...tasks[taskIndex],
@@ -323,7 +341,7 @@
 			tasks = [...tasks];
 			sortTasks();
 		}
-		
+
 		// Auto-save the status and subtasks to backend
 		try {
 			const res = await fetch(`http://localhost:3010/tasks/${selectedTask.id}`, {
@@ -353,7 +371,7 @@
 			if (newStatus) {
 				selectedTask.status = newStatus;
 			}
-			
+
 			const res = await fetch(`http://localhost:3010/tasks/${selectedTask.id}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
@@ -452,7 +470,7 @@
 			<!-- Category -->
 			<select
 				bind:value={filterByCategory}
-				class="min-w-[180px] rounded-lg border-2 border-[#4F3117] bg-white px-3 py-1 text-sm font-medium text-[#4F3117] transition-all focus:outline-none focus:ring-2 focus:ring-[#4F3117] sm:min-w-[200px] sm:px-4 sm:py-2 sm:text-base"
+				class="min-w-[180px] rounded-lg border-2 border-[#4F3117] bg-white px-3 py-1 text-sm font-medium text-[#4F3117] transition-all focus:ring-2 focus:ring-[#4F3117] focus:outline-none sm:min-w-[200px] sm:px-4 sm:py-2 sm:text-base"
 			>
 				<option value="all">Select Category</option>
 				<option value="Work">Work</option>
@@ -534,12 +552,34 @@
 								{:else}
 									<span class="text-sm text-green-600">✓ Done</span>
 								{/if}
-								<button
-									on:click={() => deleteTask(task.id)}
-									class="rounded bg-red-600 px-3 py-1 text-sm font-normal text-white hover:bg-red-700"
-								>
-									Delete
-								</button>
+								<div class="relative">
+									<button
+										on:click={() => (openMenuTaskId = openMenuTaskId === task.id ? null : task.id)}
+										class="rounded px-2 py-1 text-xl hover:bg-[#E6D5BF]"
+									>
+										⋯
+									</button>
+
+									{#if openMenuTaskId === task.id}
+										<div
+											class="absolute left-0 z-20 mt-2 w-36 rounded-lg border bg-[#fff8e1] shadow-lg"
+										>
+											<button
+												on:click={() => openEditModal(task)}
+												class="block w-full px-4 py-2 text-left text-sm hover:bg-[#f1e0c5]"
+											>
+												Edit
+											</button>
+
+											<button
+												on:click={() => deleteTask(task.id)}
+												class="block w-full px-4 py-2 text-left text-sm hover:bg-red-100"
+											>
+												Delete
+											</button>
+										</div>
+									{/if}
+								</div>
 							</div>
 						</td>
 					</tr>
@@ -581,7 +621,7 @@
 							Complete</button
 						>
 					{:else}
-						<span class="text-sm px-3 py-2 text-green-600">✓ Done</span>
+						<span class="px-3 py-2 text-sm text-green-600">✓ Done</span>
 					{/if}
 					<button
 						on:click={() => deleteTask(task.id)}
@@ -614,7 +654,10 @@
 			<div
 				class="flex items-center justify-between border-b-2 border-[#ad8a6c] px-4 py-3 text-[#4F3117]"
 			>
-				<h2 class="text-xl sm:text-2xl">Create New Quest</h2>
+				<h2 class="text-xl sm:text-2xl">
+					{modalMode === 'create' ? 'Create New Quest' : 'Edit Quest'}
+				</h2>
+
 				<button
 					on:click={() => (showModal = false)}
 					class="text-xl transition-transform hover:rotate-12">✖</button
@@ -671,8 +714,11 @@
 				<div class="mt-4 flex flex-col gap-3 sm:flex-row">
 					<button
 						class="flex-1 rounded-lg border-2 border-[#ad8a6c] bg-[#fff8e1] py-2 text-lg hover:bg-[#f1e0c5] sm:text-base"
-						on:click={submitTask}>Submit</button
+						on:click={submitTask}
 					>
+						{modalMode === 'create' ? 'Submit' : 'Save Changes'}
+					</button>
+
 					<button
 						class="flex-1 rounded-lg border-2 border-[#ad8a6c] bg-[#e0d3c2] py-2 text-lg hover:bg-[#d2c1aa] sm:text-base"
 						on:click={() => (showModal = false)}
@@ -697,7 +743,8 @@
 				</h2>
 				<button
 					on:click={() => (showPremadeModal = false)}
-					class="bg-transparent border-none font-bold text-xl text-[#4F3117] cursor-pointer transition-transform duration-200 hover:rotate-12">
+					class="cursor-pointer border-none bg-transparent text-xl font-bold text-[#4F3117] transition-transform duration-200 hover:rotate-12"
+				>
 					✕
 				</button>
 			</div>
@@ -726,129 +773,138 @@
 {/if}
 
 {#if showDetailModal && selectedTask}
-    <div
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2"
-        on:click={closeDetailModal}
-        on:keydown={(e) => e.key === 'Escape' && closeDetailModal()}
-        role="button"
-        tabindex="0"
-    >
-        <div
-            class="w-full max-w-[90vw] max-h-[90vh] overflow-y-auto rounded-xl border-6 border-double border-[#ad8a6c] bg-[#fdf3e7] font-['IM_Fell_Great_Primer_SC'] shadow-[0_0_20px_rgba(0,0,0,0.5)] md:w-[600px]"
-            on:click|stopPropagation
-            on:keydown|stopPropagation
-            role="dialog"
-            tabindex="-1"
-        >
-            <div class="flex items-center justify-between border-b-2 border-[#ad8a6c] px-4 py-3 text-[#4F3117]">
-                <h2 class="text-2xl sm:text-3xl">{selectedTask.title}</h2>
-                <button
-                    on:click={closeDetailModal}
-                    class="text-2xl transition-transform hover:rotate-12"
-                    aria-label="Close"
-                >✖</button>
-            </div>
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2"
+		on:click={closeDetailModal}
+		on:keydown={(e) => e.key === 'Escape' && closeDetailModal()}
+		role="button"
+		tabindex="0"
+	>
+		<div
+			class="max-h-[90vh] w-full max-w-[90vw] overflow-y-auto rounded-xl border-6 border-double border-[#ad8a6c] bg-[#fdf3e7] font-['IM_Fell_Great_Primer_SC'] shadow-[0_0_20px_rgba(0,0,0,0.5)] md:w-[600px]"
+			on:click|stopPropagation
+			on:keydown|stopPropagation
+			role="dialog"
+			tabindex="-1"
+		>
+			<div
+				class="flex items-center justify-between border-b-2 border-[#ad8a6c] px-4 py-3 text-[#4F3117]"
+			>
+				<h2 class="text-2xl sm:text-3xl">{selectedTask.title}</h2>
+				<button
+					on:click={closeDetailModal}
+					class="text-2xl transition-transform hover:rotate-12"
+					aria-label="Close">✖</button
+				>
+			</div>
 
-            <div class="space-y-4 p-4 text-[#4F3117] sm:p-6">
-                
-                <div class="grid grid-cols-2 gap-4 rounded-lg border-2 border-[#ad8a6c]/30 bg-[#f1e0c5]/30 p-3">
-                    <div>
-                        <span class="opacity-70 text-base">Priority:</span>
-                        <span class="block text-xl {selectedTask.priority === 'High' ? 'text-red-700 font-bold' : 'text-[#4F3117]'}">
-                            {selectedTask.priority || 'Medium'}
-                        </span>
-                    </div>
-                    <div>
-                        <span class="opacity-70 text-base">Category:</span>
-                        <span class="block text-xl">{selectedTask.category || 'N/A'}</span>
-                    </div>
-                    <div>
-                        <span class="opacity-70 text-base">End Date:</span>
-                        <span class="block text-xl">{selectedTask.end || 'No date set'}</span>
-                    </div>
-                    <div>
-                        <span class="opacity-70 text-base">Status:</span>
-                        <span class="block text-xl">{selectedTask.status}</span>
-                    </div>
-                </div>
+			<div class="space-y-4 p-4 text-[#4F3117] sm:p-6">
+				<div
+					class="grid grid-cols-2 gap-4 rounded-lg border-2 border-[#ad8a6c]/30 bg-[#f1e0c5]/30 p-3"
+				>
+					<div>
+						<span class="text-base opacity-70">Priority:</span>
+						<span
+							class="block text-xl {selectedTask.priority === 'High'
+								? 'font-bold text-red-700'
+								: 'text-[#4F3117]'}"
+						>
+							{selectedTask.priority || 'Medium'}
+						</span>
+					</div>
+					<div>
+						<span class="text-base opacity-70">Category:</span>
+						<span class="block text-xl">{selectedTask.category || 'N/A'}</span>
+					</div>
+					<div>
+						<span class="text-base opacity-70">End Date:</span>
+						<span class="block text-xl">{selectedTask.end || 'No date set'}</span>
+					</div>
+					<div>
+						<span class="text-base opacity-70">Status:</span>
+						<span class="block text-xl">{selectedTask.status}</span>
+					</div>
+				</div>
 
-                <div>
-                    <label for="notes" class="mb-1 block text-xl">Notes</label>
-                    <textarea
-                        id="notes"
-                        bind:value={selectedTask.notes}
-                        placeholder="Add your notes here..."
-                        class="min-h-20 w-full rounded border-2 border-[#ad8a6c] bg-[#fff8e1] p-2 text-lg focus:ring-2 focus:ring-[#ad8a6c] focus:outline-none"
-                    ></textarea>
-                </div>
+				<div>
+					<label for="notes" class="mb-1 block text-xl">Notes</label>
+					<textarea
+						id="notes"
+						bind:value={selectedTask.notes}
+						placeholder="Add your notes here..."
+						class="min-h-20 w-full rounded border-2 border-[#ad8a6c] bg-[#fff8e1] p-2 text-lg focus:ring-2 focus:ring-[#ad8a6c] focus:outline-none"
+					></textarea>
+				</div>
 
-                <div>
-                    <label for="suggestions" class="mb-1 block text-xl">Suggestions</label>
-                    <textarea
-                        id="suggestions"
-                        bind:value={selectedTask.suggestions}
-                        placeholder="Add suggestions or tips..."
-                        class="min-h-20 w-full rounded border-2 border-[#ad8a6c] bg-[#fff8e1] p-2 text-lg focus:ring-2 focus:ring-[#ad8a6c] focus:outline-none"
-                    ></textarea>
-                </div>
+				<div>
+					<label for="suggestions" class="mb-1 block text-xl">Suggestions</label>
+					<textarea
+						id="suggestions"
+						bind:value={selectedTask.suggestions}
+						placeholder="Add suggestions or tips..."
+						class="min-h-20 w-full rounded border-2 border-[#ad8a6c] bg-[#fff8e1] p-2 text-lg focus:ring-2 focus:ring-[#ad8a6c] focus:outline-none"
+					></textarea>
+				</div>
 
-                <div>
-                    <div class="mb-3 flex items-center justify-between">
-                        <h3 class="text-xl">Subtasks</h3>
-                        <button
-                            on:click={addSubtask}
-                            class="rounded-lg bg-[#4F3117] px-3 py-1.5 text-base text-white transition-colors hover:bg-[#3E2612]"
-                        >
-                            + Add Subtask
-                        </button>
-                    </div>
-                    
-                    <div class="max-h-[200px] space-y-2 overflow-y-auto">
-                        {#if selectedTask.subtasks && selectedTask.subtasks.length > 0}
-                            {#each selectedTask.subtasks as subtask}
-                                <div class="flex items-center gap-2 rounded border-2 border-[#ad8a6c] bg-[#fff8e1] p-3 shadow-sm">
-                                    <input
-                                        type="checkbox"
-                                        checked={subtask.completed}
-                                        on:change={() => toggleSubtask(subtask.id)}
-                                        class="h-5 w-5 cursor-pointer rounded text-[#4F3117] focus:ring-2 focus:ring-[#4F3117]"
-                                    />
-                                    <input
-                                        type="text"
-                                        bind:value={subtask.text}
-                                        placeholder="Subtask description..."
-                                        class="flex-1 border-none bg-transparent text-xl text-[#4F3117] placeholder-[#A89078] focus:outline-none {subtask.completed ? 'text-gray-500 line-through' : ''}"
-                                    />
-                                    <button
-                                        on:click={() => removeSubtask(subtask.id)}
-                                        class="text-lg font-bold text-red-600 transition-colors hover:text-red-800"
-                                        aria-label="Remove subtask"
-                                    >×</button>
-                                </div>
-                            {/each}
-                        {:else}
-                            <p class="text-lg italic text-gray-500">
-                                No subtasks yet.
-                            </p>
-                        {/if}
-                    </div>
-                </div>
+				<div>
+					<div class="mb-3 flex items-center justify-between">
+						<h3 class="text-xl">Subtasks</h3>
+						<button
+							on:click={addSubtask}
+							class="rounded-lg bg-[#4F3117] px-3 py-1.5 text-base text-white transition-colors hover:bg-[#3E2612]"
+						>
+							+ Add Subtask
+						</button>
+					</div>
 
-                <div class="mt-6 flex flex-col gap-3 sm:flex-row">
-                    <button
-                        on:click={saveTaskDetails}
-                        class="flex-1 rounded-lg border-2 border-[#ad8a6c] bg-[#fff8e1] py-2 text-xl hover:bg-[#f1e0c5]"
-                    >
-                        Save Changes
-                    </button>
-                    <button
-                        on:click={closeDetailModal}
-                        class="flex-1 rounded-lg border-2 border-[#ad8a6c] bg-[#fff8e1] py-2 text-xl hover:bg-[#d2c1aa]"
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+					<div class="max-h-[200px] space-y-2 overflow-y-auto">
+						{#if selectedTask.subtasks && selectedTask.subtasks.length > 0}
+							{#each selectedTask.subtasks as subtask}
+								<div
+									class="flex items-center gap-2 rounded border-2 border-[#ad8a6c] bg-[#fff8e1] p-3 shadow-sm"
+								>
+									<input
+										type="checkbox"
+										checked={subtask.completed}
+										on:change={() => toggleSubtask(subtask.id)}
+										class="h-5 w-5 cursor-pointer rounded text-[#4F3117] focus:ring-2 focus:ring-[#4F3117]"
+									/>
+									<input
+										type="text"
+										bind:value={subtask.text}
+										placeholder="Subtask description..."
+										class="flex-1 border-none bg-transparent text-xl text-[#4F3117] placeholder-[#A89078] focus:outline-none {subtask.completed
+											? 'text-gray-500 line-through'
+											: ''}"
+									/>
+									<button
+										on:click={() => removeSubtask(subtask.id)}
+										class="text-lg font-bold text-red-600 transition-colors hover:text-red-800"
+										aria-label="Remove subtask">×</button
+									>
+								</div>
+							{/each}
+						{:else}
+							<p class="text-lg text-gray-500 italic">No subtasks yet.</p>
+						{/if}
+					</div>
+				</div>
+
+				<div class="mt-6 flex flex-col gap-3 sm:flex-row">
+					<button
+						on:click={saveTaskDetails}
+						class="flex-1 rounded-lg border-2 border-[#ad8a6c] bg-[#fff8e1] py-2 text-xl hover:bg-[#f1e0c5]"
+					>
+						Save Changes
+					</button>
+					<button
+						on:click={closeDetailModal}
+						class="flex-1 rounded-lg border-2 border-[#ad8a6c] bg-[#fff8e1] py-2 text-xl hover:bg-[#d2c1aa]"
+					>
+						Cancel
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
 {/if}
