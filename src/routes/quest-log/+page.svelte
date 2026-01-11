@@ -823,7 +823,7 @@
 							on:click={addSubtask}
 							class="rounded-lg bg-[#4F3117] px-3 py-1.5 text-base text-white transition-colors hover:bg-[#3E2612]"
 						>
-							+ Add Subtask
+							+ Add Quest Step
 						</button>
 					</div>
 
