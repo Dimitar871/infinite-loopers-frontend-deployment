@@ -544,92 +544,6 @@
 		</div>
 	</div>
 
-	<!-- desktop -->
-	<div class="hidden overflow-x-auto sm:block">
-		<table class="w-full border-separate border-spacing-y-2 sm:border-spacing-y-4">
-			<thead class="font-['Inter',sans-serif] text-lg font-semibold text-[#4F3117]">
-				<tr>
-					<th class="px-2 py-2 text-left sm:px-4">Quest</th>
-					<th class="px-2 py-2 text-left sm:px-4">End day</th>
-					<th class="px-2 py-2 text-left sm:px-4">Priority</th>
-					<th class="px-2 py-2 text-left sm:px-4">Status</th>
-					<th class="px-2 py-2 text-left sm:px-4">Category</th>
-					<th class="px-2 py-2 text-left sm:px-4">Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each sortedTasks as task}
-					<tr
-						class="rounded-xl bg-[#F4E9D8] font-['Inter',sans-serif] font-semibold text-[#4F3117] shadow-md"
-					>
-						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">{task.title}</td>
-						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">{task.end}</td>
-						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">
-							<span
-								class={task.priority === 'High'
-									? 'font-bold text-red-600'
-									: task.priority === 'Medium'
-										? 'text-orange-600'
-										: 'text-green-600'}
-							>
-								{task.priority || 'Medium'}
-							</span>
-						</td>
-						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">{task.status}</td>
-						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">{task.category}</td>
-						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">
-							<div class="flex flex-wrap items-center gap-2">
-								<button
-									on:click={() => openDetailModal(task.id)}
-									class="rounded bg-[#4F3117] px-3 py-1 text-sm font-normal text-white hover:bg-[#3E2612]"
-									>Details</button
-								>
-								{#if task.status !== 'Completed'}
-									<button
-										on:click={() => completeTask(task.id)}
-										class="rounded bg-green-600 px-3 py-1 text-sm font-normal text-white hover:bg-green-700"
-									>
-										Complete</button
-									>
-								{:else}
-									<span class="text-sm text-green-600">✓ Done</span>
-								{/if}
-								<div class="relative">
-									<button
-										on:click={() => (openMenuTaskId = openMenuTaskId === task.id ? null : task.id)}
-										class="rounded px-2 py-1 text-xl hover:bg-[#E6D5BF]"
-									>
-										⋯
-									</button>
-
-									{#if openMenuTaskId === task.id}
-										<div
-											class="absolute left-0 z-20 mt-2 w-36 rounded-lg border bg-[#fff8e1] shadow-lg"
-										>
-											<button
-												on:click={() => openEditModal(task)}
-												class="block w-full px-4 py-2 text-left text-sm hover:bg-[#f1e0c5]"
-											>
-												Edit
-											</button>
-
-											<button
-												on:click={() => deleteTask(task.id)}
-												class="block w-full px-4 py-2 text-left text-sm hover:bg-red-100"
-											>
-												Delete
-											</button>
-										</div>
-									{/if}
-								</div>
-							</div>
-						</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
-	</div>
-
 	<!-- mobile -->
 	<div class="flex flex-col gap-4 text-[#4F3117] sm:hidden">
 		{#each sortedTasks as task}
@@ -649,7 +563,8 @@
 				<p class="text-sm">End: {task.end}</p>
 				<p class="text-sm">Status: {task.status}</p>
 				<p class="text-sm">Category: {task.category}</p>
-				<div class="mt-2 flex flex-wrap gap-2">
+
+				<div class="mt-2 flex flex-wrap items-center gap-2">
 					<button
 						on:click={() => openDetailModal(task.id)}
 						class="rounded bg-[#4F3117] px-3 py-1 text-sm font-normal text-white hover:bg-[#3E2612]"
@@ -663,23 +578,36 @@
 							Complete</button
 						>
 					{:else}
-						<span class="px-3 py-2 text-sm text-green-600">✓ Done</span>
+						<span class="px-3 py-1 text-sm text-green-600">✓ Done</span>
 					{/if}
-					<button
-						on:click={() => deleteTask(task.id)}
-						class="flex items-center justify-center rounded bg-red-600 p-2 text-white hover:bg-red-700"
-						aria-label="Delete task"
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 448 512"
-							class="h-5 w-5 fill-white"
+
+					<div class="relative">
+						<button
+							on:click={() => (openMenuTaskId = openMenuTaskId === task.id ? null : task.id)}
+							class="rounded px-3 py-1.5 text-2xl hover:bg-[#E6D5BF]"
+							aria-label="More options"
 						>
-							<path
-								d="M136.7 5.9C141.1-7.2 153.3-16 167.1-16l113.9 0c13.8 0 26 8.8 30.4 21.9L320 32 416 32c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 8.7-26.1zM32 144l384 0 0 304c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-304zm88 64c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24zm104 0c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24zm104 0c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24z"
-							/>
-						</svg>
-					</button>
+							⋯
+						</button>
+
+						{#if openMenuTaskId === task.id}
+							<div class="absolute right-0 z-20 mt-2 w-36 rounded-lg border bg-[#fff8e1] shadow-lg">
+								<button
+									on:click={() => openEditModal(task)}
+									class="block w-full px-4 py-3 text-left text-sm hover:bg-[#f1e0c5]"
+								>
+									Edit
+								</button>
+
+								<button
+									on:click={() => deleteTask(task.id)}
+									class="block w-full px-4 py-3 text-left text-sm hover:bg-red-100"
+								>
+									Delete
+								</button>
+							</div>
+						{/if}
+					</div>
 				</div>
 			</div>
 		{/each}
