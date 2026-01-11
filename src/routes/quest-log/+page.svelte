@@ -550,7 +550,7 @@
 
 	<!-- desktop -->
 	<div class="hidden sm:block">
-		<table class="w-full border-separate border-spacing-y-2 sm:border-spacing-y-4">
+		<table class="w-full border-separate border-spacing-y-2 sm:border-spacing-y-4 pb-15">
 			<thead class="font-['Inter',sans-serif] text-lg font-semibold text-[#4F3117]">
 				<tr>
 					<th class="px-2 py-2 text-left sm:px-4">Quest</th>
