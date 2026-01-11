@@ -471,6 +471,10 @@
 			openModal('Failed to delete quest', 'error');
 		}
 	}
+
+	function toggleMobileMenu(taskId) {
+		openMenuTaskId = openMenuTaskId === taskId ? null : taskId;
+	}
 </script>
 
 <div class="min-h-screen bg-[#F8F3ED] p-4 font-serif sm:p-6">
@@ -544,27 +548,145 @@
 		</div>
 	</div>
 
+	<!-- desktop -->
+	<div class="hidden sm:block">
+		<table class="w-full border-separate border-spacing-y-2 sm:border-spacing-y-4">
+			<thead class="font-['Inter',sans-serif] text-lg font-semibold text-[#4F3117]">
+				<tr>
+					<th class="px-2 py-2 text-left sm:px-4">Quest</th>
+					<th class="px-2 py-2 text-left sm:px-4">End day</th>
+					<th class="px-2 py-2 text-left sm:px-4">Priority</th>
+					<th class="px-2 py-2 text-left sm:px-4">Status</th>
+					<th class="px-2 py-2 text-left sm:px-4">Category</th>
+					<th class="px-2 py-2 text-left sm:px-4">Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each sortedTasks as task}
+					<tr
+						class="rounded-xl bg-[#F4E9D8] font-['Inter',sans-serif] font-semibold text-[#4F3117] shadow-md"
+					>
+						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">{task.title}</td>
+						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">{task.end}</td>
+						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">
+							<span
+								class={task.priority === 'High'
+									? 'font-bold text-red-600'
+									: task.priority === 'Medium'
+										? 'text-orange-600'
+										: 'text-green-600'}
+							>
+								{task.priority || 'Medium'}
+							</span>
+						</td>
+						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">{task.status}</td>
+						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">{task.category}</td>
+						<td class="sm:text-md px-2 py-2 text-base sm:px-4 sm:py-3">
+							<div class="flex flex-wrap items-center gap-2">
+								<button
+									on:click={() => openDetailModal(task.id)}
+									class="rounded bg-[#4F3117] px-3 py-1 text-sm font-normal text-white hover:bg-[#3E2612]"
+									>Details</button
+								>
+								{#if task.status !== 'Completed'}
+									<button
+										on:click={() => completeTask(task.id)}
+										class="rounded bg-green-600 px-3 py-1 text-sm font-normal text-white hover:bg-green-700"
+									>
+										Complete</button
+									>
+								{:else}
+									<span class="text-sm text-green-600">✓ Done</span>
+								{/if}
+								<div class="relative">
+									<button
+										on:click={() => (openMenuTaskId = openMenuTaskId === task.id ? null : task.id)}
+										class="rounded px-2 py-1 text-xl hover:bg-[#E6D5BF]"
+									>
+										⋯
+									</button>
+
+									{#if openMenuTaskId === task.id}
+										<div
+											class="absolute left-0 z-20 mt-2 w-36 rounded-lg border bg-[#fff8e1] shadow-lg"
+										>
+											<button
+												on:click={() => openEditModal(task)}
+												class="block w-full px-4 py-2 text-left text-sm hover:bg-[#f1e0c5]"
+											>
+												Edit
+											</button>
+
+											<button
+												on:click={() => deleteTask(task.id)}
+												class="block w-full px-4 py-2 text-left text-sm hover:bg-red-100"
+											>
+												Delete
+											</button>
+										</div>
+									{/if}
+								</div>
+							</div>
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
+
 	<!-- mobile -->
 	<div class="flex flex-col gap-4 text-[#4F3117] sm:hidden">
 		{#each sortedTasks as task}
 			<div class="rounded-xl bg-[#F4E9D8] p-4 font-['Inter',sans-serif] font-semibold shadow-md">
 				<div class="mb-2 flex items-center justify-between">
-					<h3 class="text-lg text-[#4F3117]">{task.title}</h3>
-					<span
-						class={task.priority === 'High'
-							? 'text-red-600'
-							: task.priority === 'Medium'
-								? 'text-orange-600'
-								: 'text-green-600'}
-					>
-						{task.priority || 'Medium'}
-					</span>
+					<div class="flex items-center gap-2">
+						<h3 class="text-lg text-[#4F3117]">{task.title}</h3>
+						<span
+							class={task.priority === 'High'
+								? 'text-red-600'
+								: task.priority === 'Medium'
+									? 'text-orange-600'
+									: 'text-green-600'}
+						>
+							{task.priority || 'Medium'}
+						</span>
+					</div>
+					<div class="relative">
+						<button
+							on:click={() => toggleMobileMenu(task.id)}
+							class="rounded px-2 py-1 text-xl hover:bg-[#E6D5BF]"
+							aria-label="Menu"
+						>
+							⋯
+						</button>
+
+						{#if openMenuTaskId === task.id}
+							<div class="absolute right-0 z-20 mt-2 w-32 rounded-lg border bg-[#fff8e1] shadow-lg">
+								<button
+									on:click={() => {
+										openEditModal(task);
+										openMenuTaskId = null;
+									}}
+									class="block w-full px-3 py-2 text-left text-sm hover:bg-[#f1e0c5]"
+								>
+									Edit
+								</button>
+
+								<button
+									on:click={() => deleteTask(task.id)}
+									class="block w-full px-3 py-2 text-left text-sm hover:bg-red-100"
+								>
+									Delete
+								</button>
+							</div>
+						{/if}
+					</div>
 				</div>
+
 				<p class="text-sm">End: {task.end}</p>
 				<p class="text-sm">Status: {task.status}</p>
 				<p class="text-sm">Category: {task.category}</p>
-
-				<div class="mt-2 flex flex-wrap items-center gap-2">
+				<div class="mt-2 flex flex-wrap gap-2">
 					<button
 						on:click={() => openDetailModal(task.id)}
 						class="rounded bg-[#4F3117] px-3 py-1 text-sm font-normal text-white hover:bg-[#3E2612]"
@@ -578,36 +700,8 @@
 							Complete</button
 						>
 					{:else}
-						<span class="px-3 py-1 text-sm text-green-600">✓ Done</span>
+						<span class="px-3 py-2 text-sm text-green-600">✓ Done</span>
 					{/if}
-
-					<div class="relative">
-						<button
-							on:click={() => (openMenuTaskId = openMenuTaskId === task.id ? null : task.id)}
-							class="rounded px-3 py-1.5 text-2xl hover:bg-[#E6D5BF]"
-							aria-label="More options"
-						>
-							⋯
-						</button>
-
-						{#if openMenuTaskId === task.id}
-							<div class="absolute right-0 z-20 mt-2 w-36 rounded-lg border bg-[#fff8e1] shadow-lg">
-								<button
-									on:click={() => openEditModal(task)}
-									class="block w-full px-4 py-3 text-left text-sm hover:bg-[#f1e0c5]"
-								>
-									Edit
-								</button>
-
-								<button
-									on:click={() => deleteTask(task.id)}
-									class="block w-full px-4 py-3 text-left text-sm hover:bg-red-100"
-								>
-									Delete
-								</button>
-							</div>
-						{/if}
-					</div>
 				</div>
 			</div>
 		{/each}
@@ -855,7 +949,7 @@
 								</div>
 							{/each}
 						{:else}
-							<p class="text-lg text-gray-500 italic">No subtasks yet.</p>
+							<p class="text-lg text-gray-500 italic">No subquests yet.</p>
 						{/if}
 					</div>
 				</div>
