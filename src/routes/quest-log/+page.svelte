@@ -818,7 +818,7 @@
 
 				<div>
 					<div class="mb-3 flex items-center justify-between">
-						<h3 class="text-xl">Subtasks</h3>
+						<h3 class="text-xl">Subquests</h3>
 						<button
 							on:click={addSubtask}
 							class="rounded-lg bg-[#4F3117] px-3 py-1.5 text-base text-white transition-colors hover:bg-[#3E2612]"
