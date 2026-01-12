@@ -1,13 +1,11 @@
 <script>
     import SetTimer from "./SetTimer.svelte";
+    import { selectedTask } from '../../modalStore.js';
 
     let { showModal = $bindable(), tasks } = $props();
     let dialog = $state();
+    let incompleteTasks = tasks.filter(task => task.completedAt == null);
 
-    /**
-	 * @type {null}
-	 */
-    let selectedTask = $state(null);
     let showTimerModal = $state(false);
 
     $effect(() => {
@@ -19,7 +17,7 @@
 	 * @param {any} task
 	 */
      function selectTask(task) {
-        selectedTask = task;
+        $selectedTask = task;
         showTimerModal = true;
         dialog.close();
     }
@@ -70,9 +68,9 @@
     </div>
 
     <div class="p-6">
-        {#if tasks && tasks.length > 0}
+        {#if incompleteTasks && incompleteTasks.length > 0}
         <ul class="list-none p-0 m-0 space-y-3">
-            {#each tasks as task}
+            {#each incompleteTasks as task}
             <li>
                 <button
                 onclick={() => selectTask(task)}
@@ -95,11 +93,11 @@
             {/each}
         </ul>
         {:else}
-            <h1>No quests</h1>
+            <h1 class="text-[#4F3117] text-xl">No quests</h1>
         {/if}
     </div>
 </dialog>
 
-{#if showTimerModal && selectedTask}
-    <SetTimer bind:showModal={showTimerModal} {selectedTask} />
+{#if showTimerModal && $selectedTask}
+    <SetTimer bind:showModal={showTimerModal} />
 {/if}

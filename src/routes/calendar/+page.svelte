@@ -100,5 +100,31 @@
 </script>
 
 <section class="bg-[#FAF6F0] px-6 py-12 sm:px-12 lg:px-28">
-	<div bind:this={calendarEl} class="rounded-lg bg-[#EEE9E1] p-4 font-serif shadow-lg"></div>
+	<div bind:this={calendarEl} class="calendar-container rounded-lg bg-[#EEE9E1] p-4 font-serif shadow-lg"></div>
 </section>
+
+<style>
+	:global(.calendar-container .fc-daygrid-day-events) {
+		max-height: 120px;
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+	
+	:global(.calendar-container .fc-daygrid-day-events::-webkit-scrollbar) {
+		width: 6px;
+	}
+
+	:global(.calendar-container .fc-daygrid-day-events::-webkit-scrollbar-track) {
+		background: #f1f1f1;
+		border-radius: 3px;
+	}
+
+	:global(.calendar-container .fc-daygrid-day-events::-webkit-scrollbar-thumb) {
+		background: #D8CFC4;
+		border-radius: 3px;
+	}
+
+	:global(.calendar-container .fc-daygrid-day-events::-webkit-scrollbar-thumb:hover) {
+		background: #B8ACA0;
+	}
+</style>

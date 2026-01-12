@@ -56,20 +56,20 @@
 	}
 </script>
 
-<div class="flex min-h-screen items-center justify-center bg-[#EEE9E1]">
-	<div class="relative w-full max-w-md rounded-lg bg-[#E8DCCD] border-4 border-[#4F3117] p-8 shadow-lg">
+<div class="flex min-h-screen items-center justify-center bg-[#EEE9E1] px-4 py-8">
+	<div class="relative w-full max-w-md rounded-lg bg-[#E8DCCD] border-4 border-[#4F3117] p-6 shadow-lg sm:p-8">
 		<!-- Sign Up Title -->
-		<h1 class="mb-8 text-center text-3xl font-['IM_Fell_Great_Primer_SC'] text-[#4F3117]">Sign Up</h1>
+		<h1 class="mb-6 text-center text-2xl font-['IM_Fell_Great_Primer_SC'] text-[#4F3117] sm:mb-8 sm:text-3xl">Sign Up</h1>
 
 		{#if errorMessage}
-			<div class="mb-4 rounded bg-red-100 p-3 text-red-700">
+			<div class="mb-4 rounded bg-red-100 p-3 text-sm text-red-700 sm:text-base">
 				{errorMessage}
 			</div>
 		{/if}
-		<form on:submit|preventDefault={handleSignUp} class="space-y-6">
+		<form on:submit|preventDefault={handleSignUp} class="space-y-4 sm:space-y-6">
 			<!-- Username Field -->
 			<div>
-				<label for="username" class="mb-2 block text-xl font-['IM_Fell_Great_Primer_SC'] text-[#4F3117]">
+				<label for="username" class="mb-2 block text-lg font-['IM_Fell_Great_Primer_SC'] text-[#4F3117] sm:text-xl">
 					Username
 				</label>
 				<input
@@ -77,27 +77,27 @@
 					id="username"
 					bind:value={username}
 					placeholder="Enter username..."
-					class="w-full rounded border border-[#D4C5B0] bg-white px-3 py-2 text-[#4F3117] placeholder-[#A89078] focus:border-[#4F3117] focus:outline-none"
+					class="w-full rounded border border-[#D4C5B0] bg-white px-3 py-2 text-sm text-[#4F3117] placeholder-[#A89078] focus:border-[#4F3117] focus:outline-none sm:text-base"
 					required
 				/>
 			</div>
 
 			<!-- Email Field -->
 			<div>
-				<label for="email" class="mb-2 block text-xl font-['IM_Fell_Great_Primer_SC'] text-[#4F3117]"> Email </label>
+				<label for="email" class="mb-2 block text-lg font-['IM_Fell_Great_Primer_SC'] text-[#4F3117] sm:text-xl"> Email </label>
 				<input
 					type="email"
 					id="email"
 					bind:value={email}
 					placeholder="Enter email address..."
-					class="w-full rounded border border-[#D4C5B0] bg-white px-3 py-2 text-[#4F3117] placeholder-[#A89078] focus:border-[#4F3117] focus:outline-none"
+					class="w-full rounded border border-[#D4C5B0] bg-white px-3 py-2 text-sm text-[#4F3117] placeholder-[#A89078] focus:border-[#4F3117] focus:outline-none sm:text-base"
 					required
 				/>
 			</div>
 
 			<!-- Password Field -->
 			<div>
-				<label for="password" class="mb-2 block font-['IM_Fell_Great_Primer_SC'] text-xl text-[#4F3117]">
+				<label for="password" class="mb-2 block font-['IM_Fell_Great_Primer_SC'] text-lg text-[#4F3117] sm:text-xl">
 					Password
 				</label>
 				<input
@@ -105,14 +105,14 @@
 					id="password"
 					bind:value={password}
 					placeholder="Enter password..."
-					class="w-full rounded border border-[#D4C5B0] bg-white px-3 py-2 text-[#4F3117] placeholder-[#A89078] focus:border-[#4F3117] focus:outline-none"
+					class="w-full rounded border border-[#D4C5B0] bg-white px-3 py-2 text-sm text-[#4F3117] placeholder-[#A89078] focus:border-[#4F3117] focus:outline-none sm:text-base"
 					required
 				/>
 			</div>
 
 			<!-- Confirm Password Field -->
 			<div>
-				<label for="confirmPassword" class="mb-2 block font-['IM_Fell_Great_Primer_SC'] text-xl text-[#4F3117]">
+				<label for="confirmPassword" class="mb-2 block font-['IM_Fell_Great_Primer_SC'] text-lg text-[#4F3117] sm:text-xl">
 					Confirm password
 				</label>
 				<input
@@ -120,7 +120,7 @@
 					id="confirmPassword"
 					bind:value={confirmPassword}
 					placeholder="Confirm password..."
-					class="w-full rounded border border-[#D4C5B0] bg-white px-3 py-2 text-[#4F3117] placeholder-[#A89078] focus:border-[#4F3117] focus:outline-none"
+					class="w-full rounded border border-[#D4C5B0] bg-white px-3 py-2 text-sm text-[#4F3117] placeholder-[#A89078] focus:border-[#4F3117] focus:outline-none sm:text-base"
 					required
 				/>
 			</div>
@@ -129,14 +129,14 @@
 			<button
 				type="submit"
 				disabled={isLoading}
-				class="w-full rounded font-['IM_Fell_Great_Primer_SC'] bg-[#4F3117] py-2.5 font-medium text-[#EEE9E1] transition hover:bg-[#3E2612] disabled:opacity-50"
+				class="w-full rounded font-['IM_Fell_Great_Primer_SC'] bg-[#4F3117] py-2.5 text-sm font-medium text-[#EEE9E1] transition hover:bg-[#3E2612] disabled:opacity-50 sm:text-base"
 			>
 				{isLoading ? 'SIGNING UP...' : 'SIGN UP'}
 			</button>
 		</form>
 
 		<!-- Sign In Link -->
-		<div class="mt-4 text-center font-['IM_Fell_Great_Primer_SC'] text-lg text-[#4F3117]">
+		<div class="mt-4 text-center font-['IM_Fell_Great_Primer_SC'] text-base text-[#4F3117] sm:text-lg">
 			Already have an account?
 			<a href="/signin" class="font-medium text-[#7A5C3E] hover:underline">Sign in here</a>
 		</div>
