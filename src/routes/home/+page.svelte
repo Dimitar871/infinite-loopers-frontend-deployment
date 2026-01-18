@@ -74,7 +74,7 @@
 		tourStep = 0;
 		window.history.replaceState({}, '', window.location.pathname);
 
-		await fetch('http://localhost:3011/users/finish-tour', {
+		await fetch('${import.meta.env.VITE_API_URL}/users/finish-tour', {
 			method: 'PATCH',
 			credentials: 'include'
 		});

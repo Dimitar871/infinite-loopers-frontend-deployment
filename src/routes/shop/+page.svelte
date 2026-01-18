@@ -15,7 +15,7 @@
      */
     async function buyCharacter(characterId) {
         try {
-            const res = await fetch(`http://localhost:3011/users/${userId}/characters`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/characters`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ characterId })
@@ -41,7 +41,7 @@
      */
     async function buyDecoration(decorationId) {
         try {
-            const res = await fetch(`http://localhost:3011/users/${userId}/decorations`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/decorations`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ decorationId })

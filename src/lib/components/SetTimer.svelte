@@ -26,7 +26,7 @@
   if (!$selectedTask) return;
 
   try {
-    const response = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${$selectedTask.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

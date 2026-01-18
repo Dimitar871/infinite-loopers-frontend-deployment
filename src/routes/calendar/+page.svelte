@@ -42,7 +42,7 @@
 	async function loadTasks() {
 		if (!userId) return;
 		try {
-			const res = await fetch(`http://localhost:3011/tasks/${userId}`);
+			const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${userId}`);
 			const data = await res.json();
 			if (data.success) {
 				tasks = data.tasks.map((task) => ({

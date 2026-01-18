@@ -8,7 +8,7 @@
         const isPlaced = placedDecorations.includes(decorationId);
 
 		try {
-			const res = await fetch(`http://localhost:3011/users/${userId}/decorations/placed`, {
+			const res = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/decorations/placed`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ decorationId, placed: !isPlaced })

@@ -97,7 +97,7 @@
 	async function loadTasks() {
 		if (!userId) return;
 		try {
-			const res = await fetch(`http://localhost:3011/tasks/${userId}`);
+			const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${userId}`);
 			const data = await res.json();
 			if (data.success) {
 				tasks = data.tasks.map((task, index) => {
@@ -210,7 +210,7 @@
 		try {
 			// EDIT MODE
 			if (modalMode === 'edit' && editingTaskId) {
-				const res = await fetch(`http://localhost:3011/tasks/${editingTaskId}`, {
+				const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${editingTaskId}`, {
 					method: 'PUT',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(form)
@@ -227,7 +227,7 @@
 			}
 
 			// CREATE MODE
-			const res = await fetch(`http://localhost:3011/tasks/${userId}`, {
+			const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${userId}`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ ...form, userId })
@@ -259,7 +259,7 @@
 
 	async function completeTask(taskId) {
 		try {
-			const res = await fetch(`http://localhost:3011/tasks/${taskId}/complete`, {
+			const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${taskId}/complete`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' }
 			});
@@ -386,7 +386,7 @@
 
 		// Auto-save the status and subtasks to backend
 		try {
-			const res = await fetch(`http://localhost:3010/tasks/${selectedTask.id}`, {
+			const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${selectedTask.id}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -414,7 +414,7 @@
 				selectedTask.status = newStatus;
 			}
 
-			const res = await fetch(`http://localhost:3010/tasks/${selectedTask.id}`, {
+			const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${selectedTask.id}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -453,7 +453,7 @@
 
 	async function deleteTask(taskId) {
 		try {
-			const res = await fetch(`http://localhost:3010/tasks/${taskId}`, {
+			const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${taskId}`, {
 				method: 'DELETE',
 				headers: { 'Content-Type': 'application/json' }
 			});

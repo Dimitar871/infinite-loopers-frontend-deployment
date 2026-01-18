@@ -60,7 +60,7 @@
 		if (!$selectedTask) return;
 
 		try {
-			const response = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}`, {
+			const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${$selectedTask.id}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -76,7 +76,7 @@
 		if (!$selectedTask) return;
 
 		try {
-			const response = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}`, {
+			const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${$selectedTask.id}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -165,7 +165,7 @@
 		initialSeconds = minutes * 60;
 		secondsLeft = initialSeconds;
 		try {
-			const response = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}`, {
+			const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${$selectedTask.id}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -199,14 +199,14 @@
 		}
 
 		try {
-			const rewardsRes = await fetch(`http://localhost:3012/users/${userId}/add-rewards`, {
+			const rewardsRes = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/add-rewards`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ coins: earnedCoins, xp: earnedXP })
 			});
 			const rewardsData = await rewardsRes.json();
 
-			const taskRes = await fetch(`http://localhost:3011/tasks/${$selectedTask.id}/complete`, {
+			const taskRes = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${$selectedTask.id}/complete`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' }
 			});

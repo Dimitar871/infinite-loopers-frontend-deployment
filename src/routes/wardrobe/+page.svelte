@@ -14,7 +14,7 @@
 async function equipCharacter(characterId) {
     try {
         const res = await fetch(
-            `http://localhost:3011/users/${userId}/characters/current`,
+            `${import.meta.env.VITE_API_URL}/users/${userId}/characters/current`,
             {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
