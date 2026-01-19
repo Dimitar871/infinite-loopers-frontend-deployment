@@ -24,6 +24,6 @@ export const load = async ({ cookies, fetch }) => {
         return { characters: allUserCharactersArray, user: userInformation };
     } catch (error) {
         console.error('Error loading characters:', error);
-        return { error };
+        return { error: error.message || 'Failed to load characters' };
     }
 };

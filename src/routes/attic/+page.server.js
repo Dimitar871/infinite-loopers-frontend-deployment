@@ -31,6 +31,6 @@ export const load = async ({ cookies, fetch }) => {
         return { decorations: allUserDecorationsArray, user: userInformation, placedDecorations: allPlacedDecorations.placedDecorationIds };
     } catch (error) {
         console.error('Error loading decorations:', error);
-        return { error };
+        return { error: error.message || 'Failed to load decorations' };
     }
 };

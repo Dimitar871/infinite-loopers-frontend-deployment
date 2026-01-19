@@ -40,6 +40,6 @@ export const load = async ({ cookies, fetch }) => {
         return { character: currentCharacter, decorations: placedDecorations, tasks: allTasks};
     } catch (error) {
         console.error('Error loading character:', error);
-        return { error };
+        return { error: error.message || 'Failed to load page data' };
     }
 };

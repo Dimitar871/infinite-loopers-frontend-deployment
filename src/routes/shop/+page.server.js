@@ -59,6 +59,6 @@ export const load = async ({ cookies, fetch }) => {
          };
     } catch (error) {
         console.error('Error loading characters:', error);
-        return { error };
+        return { error: error.message || 'Failed to load shop data' };
     }
 };
