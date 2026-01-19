@@ -17,6 +17,7 @@
         try {
             const res = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/characters`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ characterId })
             });
@@ -43,6 +44,7 @@
         try {
             const res = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/decorations`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ decorationId })
             });

@@ -22,7 +22,9 @@
 
 	async function fetchAchievements(userId) {
 		try {
-			const response = await fetch(`${import.meta.env.VITE_API_URL}/achievements/user/${userId}`);
+			const response = await fetch(`${import.meta.env.VITE_API_URL}/achievements/user/${userId}`, {
+				credentials: 'include'
+			});
 			const data = await response.json();
 			if (data.success) achievements = data.achievements;
 		} catch (error) {
@@ -32,7 +34,9 @@
 
 	async function fetchStats(userId) {
 		try {
-			const response = await fetch(`${import.meta.env.VITE_API_URL}/achievements/user/${userId}/stats`);
+			const response = await fetch(`${import.meta.env.VITE_API_URL}/achievements/user/${userId}/stats`, {
+				credentials: 'include'
+			});
 			const data = await response.json();
 			if (data.success) stats = data.stats;
 		} catch (error) {

@@ -62,6 +62,7 @@
 		try {
 			const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${$selectedTask.id}`, {
 				method: 'PUT',
+				credentials: 'include',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					subtasks: $selectedTask.subtasks
@@ -78,6 +79,7 @@
 		try {
 			const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${$selectedTask.id}`, {
 				method: 'PUT',
+				credentials: 'include',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					timeSpent: $selectedTask.timeSpent + (initialSeconds - secondsLeft)
@@ -167,6 +169,7 @@
 		try {
 			const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${$selectedTask.id}`, {
 				method: 'PUT',
+				credentials: 'include',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					duration: initialSeconds
@@ -201,6 +204,7 @@
 		try {
 			const rewardsRes = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/add-rewards`, {
 				method: 'PUT',
+				credentials: 'include',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ coins: earnedCoins, xp: earnedXP })
 			});
@@ -208,6 +212,7 @@
 
 			const taskRes = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${$selectedTask.id}/complete`, {
 				method: 'PUT',
+				credentials: 'include',
 				headers: { 'Content-Type': 'application/json' }
 			});
 			const taskData = await taskRes.json();

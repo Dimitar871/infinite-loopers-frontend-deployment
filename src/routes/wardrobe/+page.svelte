@@ -17,6 +17,7 @@ async function equipCharacter(characterId) {
             `${import.meta.env.VITE_API_URL}/users/${userId}/characters/current`,
             {
                 method: 'PUT',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ characterId })
             }

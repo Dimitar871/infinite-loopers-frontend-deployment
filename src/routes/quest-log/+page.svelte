@@ -97,7 +97,9 @@
 	async function loadTasks() {
 		if (!userId) return;
 		try {
-			const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${userId}`);
+			const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${userId}`, {
+				credentials: 'include'
+			});
 			const data = await res.json();
 			if (data.success) {
 				tasks = data.tasks.map((task, index) => {
@@ -212,6 +214,7 @@
 			if (modalMode === 'edit' && editingTaskId) {
 				const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${editingTaskId}`, {
 					method: 'PUT',
+					credentials: 'include',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(form)
 				});
@@ -229,6 +232,7 @@
 			// CREATE MODE
 			const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${userId}`, {
 				method: 'POST',
+				credentials: 'include',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ ...form, userId })
 			});
@@ -261,6 +265,7 @@
 		try {
 			const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${taskId}/complete`, {
 				method: 'PUT',
+				credentials: 'include',
 				headers: { 'Content-Type': 'application/json' }
 			});
 			const data = await res.json();
@@ -388,6 +393,7 @@
 		try {
 			const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${selectedTask.id}`, {
 				method: 'PUT',
+				credentials: 'include',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					notes: selectedTask.notes,
@@ -416,6 +422,7 @@
 
 			const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${selectedTask.id}`, {
 				method: 'PUT',
+				credentials: 'include',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					notes: selectedTask.notes,
@@ -455,6 +462,7 @@
 		try {
 			const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${taskId}`, {
 				method: 'DELETE',
+				credentials: 'include',
 				headers: { 'Content-Type': 'application/json' }
 			});
 

@@ -28,6 +28,7 @@
   try {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${$selectedTask.id}`, {
       method: 'PUT',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         duration: minutes * 60

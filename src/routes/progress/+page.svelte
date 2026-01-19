@@ -91,13 +91,17 @@
 			}
 
 			// 1. Fetch Charts from TASKS Service
-			const taskResponse = await fetch(`${import.meta.env.VITE_API_URL}/tasks/progress/${userId}`);
+			const taskResponse = await fetch(`${import.meta.env.VITE_API_URL}/tasks/progress/${userId}`, {
+				credentials: 'include'
+			});
 			const taskData = await taskResponse.json();
 
 			// 2. Fetch Coins from USERS Service
 			let userData = null;
 			try {
-				const userResponse = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}`);
+				const userResponse = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}`, {
+					credentials: 'include'
+				});
 				userData = await userResponse.json();
 			} catch (e) {
 				console.error('Could not fetch user details (coins)', e);
