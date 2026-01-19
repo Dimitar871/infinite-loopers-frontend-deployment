@@ -53,6 +53,8 @@
 			localStorage.removeItem('user');
 			localStorage.removeItem('userId');
 			localStorage.removeItem('email');
+			// Clear the userId cookie
+			document.cookie = 'userId=; path=/; max-age=0';
 			user = null;
 			window.location.href = '/signin';
 		} catch (err) {

@@ -35,8 +35,10 @@
 			if (data.success) {
 				localStorage.setItem('userId', data.user.id);
 				localStorage.setItem('user', JSON.stringify(data.user));
-
 				localStorage.setItem('email', data.user.email);
+
+				// Set cookie for server-side rendering
+				document.cookie = `userId=${data.user.id}; path=/; max-age=86400; SameSite=Lax`;
 
 				window.location.href = '/home';
 			} else {
