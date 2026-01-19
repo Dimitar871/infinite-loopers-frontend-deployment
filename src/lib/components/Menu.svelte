@@ -23,7 +23,7 @@
 
 		user = JSON.parse(storedUser);
 
-		const res = await fetch('${import.meta.env.VITE_API_URL}/users/status', {
+		const res = await fetch(`${import.meta.env.VITE_API_URL}/users/status`, {
 			credentials: 'include'
 		});
 
@@ -42,7 +42,7 @@
 	// Logout function
 	async function handleLogout() {
 		try {
-			await fetch('${import.meta.env.VITE_API_URL}/auth/logout', {
+			await fetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
 				method: 'POST',
 				credentials: 'include'
 			});
