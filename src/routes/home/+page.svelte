@@ -70,6 +70,10 @@
 		tourStep = 3;
 	}
 
+	function closeTour() {
+		tourStep = 0;
+	}
+
 	async function finishTour() {
 		tourStep = 0;
 		window.history.replaceState({}, '', window.location.pathname);

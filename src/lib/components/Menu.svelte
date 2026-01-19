@@ -34,6 +34,10 @@
 		}
 	});
 
+	function closeTour() {
+		tourStep = 0;
+	}
+
 	function goToStep2() {
 		tourStep = 0;
 		goto('/home?step=2');
